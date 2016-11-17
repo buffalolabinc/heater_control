@@ -45,13 +45,14 @@ void InitAdafruitMQTT()
 }
 
 // connect to adafruit io via MQTT
-void ConnectAdafruitMQTT() {
+bool ConnectAdafruitMQTT() {
 
+  bool isConnected = false;
   Serial.print(F("Connecting to Adafruit IO... "));
 
   int8_t ret;
 
-  while ((ret = mqtt.connect()) != 0) {
+  if ((ret = mqtt.connect()) != 0) {
 
     switch (ret) {
       case 1: Serial.println(F("Wrong protocol")); break;
@@ -62,27 +63,31 @@ void ConnectAdafruitMQTT() {
       case 6: Serial.println(F("Failed to subscribe")); break;
       default: Serial.println(F("Connection failed")); break;
     }
-
-    if(ret >= 0)
-      mqtt.disconnect();
-
-    Serial.println(F("Retrying connection..."));
-    delay(5000);
-
   }
-
-  Serial.println(F("Adafruit IO Connected!"));
-
+  if(ret != 0)
+  {
+    mqtt.disconnect();
+    Serial.println(F("Failed to connect to Adafruit IO.  Will try again in 5 minutes."));
+    isConnected = false; 
+  }
+  else
+  {
+    Serial.println(F("Adafruit IO Connected!"));
+    isConnected = true;
+  }
+  return isConnected;
 }
 
-void CheckAdafruitMQTT()
+bool CheckAdafruitMQTT()
 {
+  bool isConnected = true;
   // ping adafruit io a few times to make sure we remain connected
   if(! mqtt.ping(3)) {
     // reconnect to adafruit io
     if(! mqtt.connected())
-      ConnectAdafruitMQTT();
+      isConnected = ConnectAdafruitMQTT();
   }
+  return isConnected;
 }
 
 //void FeedAdafruitMQTT(float fahrenheit)

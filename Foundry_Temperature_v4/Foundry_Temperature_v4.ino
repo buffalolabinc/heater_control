@@ -62,8 +62,8 @@ void syncDST()
 
 void UpdateAdafruitMQTT()
 {
-  CheckAdafruitMQTT();
-  FeedAdafruitMQTT(currentTemp);
+  if (CheckAdafruitMQTT())
+    FeedAdafruitMQTT(currentTemp);
 }
 
 void CheckTemperature()

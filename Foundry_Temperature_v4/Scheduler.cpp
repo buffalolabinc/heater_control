@@ -15,8 +15,8 @@ int currentState = off;
 
 #define OVERRIDE_DURATION (2 * 3600)  //Override schedule to day setpoint. Overrides last for 2 hours
 
-#define DAY_SETPOINT 70   // daytime temperature is set to 70 degrees
-#define NIGHT_SETPOINT 60  // nighttime temperature is set to 60 degrees
+#define DAY_SETPOINT 65   // daytime temperature is set to 65 degrees
+#define NIGHT_SETPOINT 55  // nighttime temperature is set to 55 degrees
 
 //these are based on Time library definition of Sunday as day 1. There is no day 0.
 #define SATURDAY 7
