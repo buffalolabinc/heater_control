@@ -95,6 +95,7 @@ void CheckTemperature()
 void DisplayTime()
 {
   LCDDisplayTime(now());
+  LCDDisplayTemp(currentTemp, currentSetpoint);
 }
 
 //void IncreaseSetPoint()

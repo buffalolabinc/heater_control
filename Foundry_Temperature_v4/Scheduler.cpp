@@ -80,5 +80,5 @@ void SetOverride()
   breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
   currentAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, UpdateSchedule);  //Set an alarm to expire exactly at the end of the override period
 
-  LCDDisplayTemp(currentTemp, currentSetpoint);
+//  LCDDisplayTemp(currentTemp, currentSetpoint);
 }
