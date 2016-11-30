@@ -1,6 +1,6 @@
 #include "Common.h"
 
-typedef enum states {off, daytime, nighttime, weekend, override };  //override turns heat up to daytime setpoint for 2 hours.
+typedef enum states {off, daytime, nighttime, weekend };  //override turns heat up to daytime setpoint for 2 hours.
 
 int currentSetpoint;
 int currentState = off;
@@ -25,6 +25,8 @@ int currentState = off;
 
 AlarmID_t currentAlarm;   //ID of current scheduler alarm
 
+volatile bool overrideEnabled = false;
+
 void UpdateSchedule()
 {
   tmElements_t tm;
@@ -36,26 +38,29 @@ void UpdateSchedule()
   
   if ((currentDay == SATURDAY) || (currentDay == SUNDAY))
   {
-    currentSetpoint = NIGHT_SETPOINT;
+    if (!overrideEnabled)
+      currentSetpoint = NIGHT_SETPOINT;
     currentState = weekend;
-    currentAlarm = Alarm.alarmOnce(0, 0, 0, UpdateSchedule);  //Set an alarm to expire exactly at midnight
-    Serial.println("Weekend Schedule");
+    currentAlarm = Alarm.alarmOnce(0, 0, 1, UpdateSchedule);  //Set an alarm to expire  at midnight
+    Serial.print("Weekend Schedule. current setpoint is "); Serial.println(currentSetpoint);
   }
   else
   {
     if ((currentHour >= DAY_START) && (currentHour <  DAY_END))
     {
-      currentSetpoint = DAY_SETPOINT;
+      if (!overrideEnabled)
+        currentSetpoint = DAY_SETPOINT;
       currentState = daytime;
-      currentAlarm = Alarm.alarmOnce(DAY_END_HOUR, DAY_END_MIN, 0, UpdateSchedule);  //Set an alarm to expire exactly at DAY_END
-      Serial.println("Daytime Schedule");
+      currentAlarm = Alarm.alarmOnce(DAY_END_HOUR, DAY_END_MIN, 1, UpdateSchedule);  //Set an alarm to expire  at DAY_END
+      Serial.print("Daytime Schedule. current setpoint is "); Serial.println(currentSetpoint);
     }
     else
     {
-      currentSetpoint = NIGHT_SETPOINT;
+      if (!overrideEnabled)
+        currentSetpoint = NIGHT_SETPOINT;
       currentState = nighttime;
-      currentAlarm = Alarm.alarmOnce(DAY_START_HOUR, DAY_START_MIN, 0, UpdateSchedule);  //Set an alarm to expire exactly at DAY_START
-      Serial.println("Nighttime Schedule");
+      currentAlarm = Alarm.alarmOnce(DAY_START_HOUR, DAY_START_MIN, 1, UpdateSchedule);  //Set an alarm to expire  at DAY_START
+      Serial.print("Nighttime Schedule. current setpoint is "); Serial.println(currentSetpoint);
     }
   }
   LCDDisplayTemp(currentTemp, currentSetpoint);
@@ -67,18 +72,27 @@ void InitScheduler()
   UpdateSchedule();
 }
 
+void EndOverride()
+{
+  overrideEnabled = false;
+  if (daytime == currentState)
+    currentSetpoint = DAY_SETPOINT;
+  else
+    currentSetpoint = NIGHT_SETPOINT;
+  
+  Serial.print("end override. current setpoint is "); Serial.println(currentSetpoint);
+
+}
 
 void SetOverride()
 {
   tmElements_t overrideExpiration;
-  Alarm.disable(currentAlarm);
-  Alarm.free(currentAlarm);
+  overrideEnabled = true;
   
   currentSetpoint = DAY_SETPOINT;
-  currentState = override;
  
   breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
-  currentAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, UpdateSchedule);  //Set an alarm to expire exactly at the end of the override period
+  currentAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, EndOverride);  //Set an alarm to expire exactly at the end of the override period
 
 //  LCDDisplayTemp(currentTemp, currentSetpoint);
 }

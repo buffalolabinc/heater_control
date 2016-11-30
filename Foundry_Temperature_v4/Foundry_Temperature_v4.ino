@@ -56,7 +56,7 @@ void syncDST()
   int dstHour = (hour()+1 % 24);   //Get the next hour from now.
   //Set an alarm to expire exactly on the next hour, so we can check for DST change
   Alarm.alarmOnce(dstHour, 0, 0, syncDST);
-  Serial.print("Next check for DST change at "); Serial.print(dstHour); Serial.println(":00 UTC");
+  Serial.print("Next check for DST change at "); Serial.print(dstHour); Serial.println(":00");
 
 }
 

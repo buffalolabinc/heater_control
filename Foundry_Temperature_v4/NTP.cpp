@@ -92,10 +92,10 @@ time_t getNTPTime()
     // print Unix time:
     Serial.println(epoch);
 
-    CorrectDSTsettings(epoch);
+    epoch += cur_UTC_offset;  //everything is set up to work on local time
 
-    epoch += cur_UTC_offset;
-    
+    CorrectDSTsettings(epoch);
+ 
   }
   return epoch;
 }

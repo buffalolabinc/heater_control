@@ -21,7 +21,7 @@ long dst_UTC_offset = -4 * 3600;  //Daylight Savings time UTC offset, US Eastern
 long std_UTC_offset = -5 * 3600;  //Standard Time UTC offset, US Eastern Standard Time
 
 //  Code will figure out correct current offset every time it starts up
-int cur_UTC_offset;  //current UTC offset
+int cur_UTC_offset = 0;  //current UTC offset
 
 char* FormatFullTime(time_t t, char* buf, int bufLen)
 {
@@ -128,14 +128,14 @@ void CorrectDSTsettings(time_t currentTime)
 {
   #ifdef CLOCK_DEBUG
   char buf[32];
-  Serial.print("CorrectDSTsettings: currently (UTC) "); Serial.println(FormatFullTime(currentTime, buf, 32)); 
+  Serial.print("CorrectDSTsettings: currently "); Serial.print(FormatFullTime(currentTime, buf, 32)); Serial.println((0 == cur_UTC_offset)?" (UTC)":" (local)");
   #endif
 
   //First, make sure we're not behind the times.  DST change times should ALWAYS
   // be later than the current time
 
   #ifdef CLOCK_DEBUG
-  Serial.print("dst start time is (UTC) "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32)); 
+  Serial.print("dst start time is "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32)); 
   #endif
 
   while (currentTime >= dst_start_seconds)
@@ -144,8 +144,8 @@ void CorrectDSTsettings(time_t currentTime)
   }
 
   #ifdef CLOCK_DEBUG
-  Serial.print("dst start time adjusted to (UTC) "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32)); 
-  Serial.print("dst end time is (UTC) "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); 
+  Serial.print("dst start time adjusted to "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32)); 
+  Serial.print("dst end time is "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); 
   #endif
 
   //now check the fall change
@@ -155,7 +155,7 @@ void CorrectDSTsettings(time_t currentTime)
   }
 
   #ifdef CLOCK_DEBUG
-  Serial.print("dst end time adjusted to (UTC) "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); 
+  Serial.print("dst end time adjusted to "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); 
   Serial.println("CorrectDSTsettings Advance DST Change complete"); 
   #endif
 
@@ -168,7 +168,7 @@ void CorrectDSTsettings(time_t currentTime)
   // (i.e., we're currently observing standard time)
 
   #ifdef CLOCK_DEBUG
-  Serial.print("current UTC offset is "); Serial.println(cur_UTC_offset); 
+  Serial.print("current UTC offset is "); Serial.print(cur_UTC_offset); Serial.println(" seconds"); 
   #endif
 
   if (dst_start_seconds >= dst_end_seconds)   //If we're currently observing daylight savings time...
@@ -187,7 +187,7 @@ void CorrectDSTsettings(time_t currentTime)
   }
 
   #ifdef CLOCK_DEBUG
-  Serial.print("UTC offset is now "); Serial.println(cur_UTC_offset); 
+  Serial.print("UTC offset is now "); Serial.print(cur_UTC_offset); Serial.print(" seconds"); 
   #endif
 
   #ifdef CLOCK_DEBUG
@@ -201,7 +201,7 @@ int Check_DST(time_t currentTime)
  
   #ifdef CLOCK_DEBUG
   char buf[32];
-  Serial.print("Check_DST: currently (UTC) "); Serial.println(FormatFullTime(currentTime, buf, 32)); 
+  Serial.print("Check_DST: currently "); Serial.println(FormatFullTime(currentTime, buf, 32)); 
   #endif
 
   //CorrectDSTsettings(currentTime);        //make sure all our daylight savings time settings are correct
