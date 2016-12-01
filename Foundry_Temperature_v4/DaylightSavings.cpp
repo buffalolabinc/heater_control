@@ -187,7 +187,7 @@ void CorrectDSTsettings(time_t currentTime)
   }
 
   #ifdef CLOCK_DEBUG
-  Serial.print("UTC offset is now "); Serial.print(cur_UTC_offset); Serial.print(" seconds"); 
+  Serial.print("UTC offset is now "); Serial.print(cur_UTC_offset); Serial.println(" seconds"); 
   #endif
 
   #ifdef CLOCK_DEBUG

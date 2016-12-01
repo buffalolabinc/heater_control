@@ -24,6 +24,7 @@ int currentState = off;
 #define MONDAY 2
 
 AlarmID_t currentAlarm;   //ID of current scheduler alarm
+AlarmID_t overrideAlarm;   //ID of current override alarm
 
 volatile bool overrideEnabled = false;
 
@@ -87,12 +88,23 @@ void EndOverride()
 void SetOverride()
 {
   tmElements_t overrideExpiration;
-  overrideEnabled = true;
-  
-  currentSetpoint = DAY_SETPOINT;
- 
-  breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
-  currentAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, EndOverride);  //Set an alarm to expire exactly at the end of the override period
 
-//  LCDDisplayTemp(currentTemp, currentSetpoint);
+  if (!overrideEnabled)
+  {
+    overrideEnabled = true;
+    
+    currentSetpoint = DAY_SETPOINT;
+   
+    breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
+    overrideAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, EndOverride);  //Set an alarm to expire exactly at the end of the override period
+  }
+  else
+  {
+    overrideEnabled = false;
+    Alarm.free(overrideAlarm);
+    if (daytime == currentState)
+      currentSetpoint = DAY_SETPOINT;
+    else
+      currentSetpoint = NIGHT_SETPOINT;
+  }
 }
