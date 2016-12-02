@@ -34,7 +34,7 @@ float ReadTempSensors()
   {
     Serial.print("ROM =");
     for ( i = 0; i < 8; i++) {
-      Serial.write(' ');
+      Serial.print(" ");
       Serial.print(addr[i], HEX);
     }
 
@@ -43,24 +43,24 @@ float ReadTempSensors()
     }
     else
     {
-      Serial.println();
+      //Serial.println();
       bool skipSensor = false;
       // the first ROM byte indicates which chip
       switch (addr[0]) {
         case 0x10:
-          Serial.println("  Chip = DS18S20");  // or old DS1820
+          //Serial.println("  Chip = DS18S20");  // or old DS1820
           type_s = 1;
           break;
         case 0x28:
-          Serial.println("  Chip = DS18B20");
+          //Serial.println("  Chip = DS18B20");
           type_s = 0;
           break;
         case 0x22:
-          Serial.println("  Chip = DS1822");
+          //Serial.println("  Chip = DS1822");
           type_s = 0;
           break;
         default:
-          Serial.println("Device is not a DS18x20 family device.");
+          //Serial.println("Device is not a DS18x20 family device.");
           skipSensor = true;
       }
       if (!skipSensor)
@@ -76,17 +76,17 @@ float ReadTempSensors()
         ds.select(addr);
         ds.write(0xBE);         // Read Scratchpad
 
-        Serial.print("  Data = ");
-        Serial.print(present, HEX);
-        Serial.print(" ");
+        //Serial.print("  Data = ");
+        //Serial.print(present, HEX);
+        //Serial.print(" ");
         for ( i = 0; i < 9; i++) {           // we need 9 bytes
           data[i] = ds.read();
-          Serial.print(data[i], HEX);
-          Serial.print(" ");
+          //Serial.print(data[i], HEX);
+          //Serial.print(" ");
         }
-        Serial.print(" CRC=");
-        Serial.print(OneWire::crc8(data, 8), HEX);
-        Serial.println();
+        //Serial.print(" CRC=");
+        //Serial.print(OneWire::crc8(data, 8), HEX);
+        //Serial.println();
 
         // Convert the data to actual temperature
         // because the result is a 16 bit signed integer, it should
@@ -114,17 +114,17 @@ float ReadTempSensors()
         fahrenheit = celsius * 1.8 + 32.0;
 
         Serial.print("  Temperature = ");
-        Serial.print(celsius);
-        Serial.print(" Celsius, ");
+        //Serial.print(celsius);
+        //Serial.print(" Celsius, ");
         Serial.print(fahrenheit);
         Serial.println(" Fahrenheit");
       }
     }
-    LCDDisplayTime(now());  //kludge.  ReadTempSensors blocks for about 1 second per sensor.  This call keeps the colon blinking in the time display.
+    LCDUpdateDisplay();  //kludge.  ReadTempSensors blocks for about 1 second per sensor.  This call keeps the colon blinking in the time display.
   }
   
-  Serial.println("No more addresses.");
-  Serial.println();
+  //Serial.println("No more addresses.");
+  //Serial.println();
   ds.reset_search();
   float avgCelsius = (sum / sensorCount) / 16.0;
   float avgFahrenheit = celsius * 1.8 + 32.0;

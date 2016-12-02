@@ -90,28 +90,10 @@ bool CheckAdafruitMQTT()
   return isConnected;
 }
 
-//void FeedAdafruitMQTT(float fahrenheit)
-//{
-//  int s = 0;
-//  bool found = false;
-//  while ((!found) && (s < NUM_SENSORS))
-//  {
-//    if (0 == memcmp(addr, sensorMap[s].romAddr, 8))
-//    {
-//      found = true;
-//      if (! sensorMap[s].feed->publish(fahrenheit))
-//        Serial.println(F("Failed."));
-//      else
-//        Serial.println(F("Success!"));
-//    }
-//    s++;    
-//  }
-//}
-
 void FeedAdafruitMQTT(float fahrenheit)
 {
+  Serial.print(F("MQTT feed"));
   if (! sensorMap[0].feed->publish(fahrenheit))
-    Serial.println(F("Failed."));
-  else
-    Serial.println(F("Success!"));
+    Serial.print(F(" failed."));
+  Serial.println();
 }

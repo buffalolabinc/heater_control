@@ -91,15 +91,11 @@ time_t getNTPTime()
     epoch = secsSince1900 - seventyYears;
     // print Unix time:
     Serial.println(epoch);
-
-    if (0 == cur_UTC_offset)
-    {
-      CorrectDSTsettings(epoch);
-    }
-
-    epoch += cur_UTC_offset;  //everything is set up to work on local time
-
-    CorrectDSTsettings(epoch);
+                              //epoch = 1489301970;  //for debugging. Just before change to EDST
+                              //epoch = 1478411970;  //for debugging. Just before change to EST
+                              
+    CorrectDSTsettings(epoch);  //DST operations happen in Unix time
+    epoch += cur_UTC_offset;    //remainder of operations happen in local time
   }
   return epoch;
 }

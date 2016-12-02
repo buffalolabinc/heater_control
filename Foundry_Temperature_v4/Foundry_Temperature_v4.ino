@@ -26,11 +26,11 @@ void setup(void) {
 
   CheckTemperature();
   UpdateAdafruitMQTT();
-  DisplayTime();
+  LCDUpdateDisplay();
   
   Alarm.timerRepeat(15, CheckTemperature);     //check temperature every 15 seconds
   Alarm.timerRepeat(300, UpdateAdafruitMQTT); //Update MQTT every 5 minutes
-  Alarm.timerRepeat(1, DisplayTime);          //updates the LCD time display. Also bumps the NTP syncProvider timer
+  Alarm.timerRepeat(1, LCDUpdateDisplay);          //updates the LCD time display. Also bumps the NTP syncProvider timer
 
 //  pinMode(UP_BUTTON, INPUT_PULLUP);  //Only used with adjustable thermostat
 //  pinMode(DOWN_BUTTON, INPUT_PULLUP);  //Only used with adjustable thermostat
@@ -56,7 +56,7 @@ void syncDST()
   int dstHour = (hour()+1 % 24);   //Get the next hour from now.
   //Set an alarm to expire exactly on the next hour, so we can check for DST change
   Alarm.alarmOnce(dstHour, 0, 0, syncDST);
-  Serial.print("Next check for DST change at "); Serial.print(dstHour); Serial.println(":00");
+  Serial.print("Next check for DST change at "); Serial.print(dstHour); Serial.print(":00"); Serial.println(" (Local)");
 
 }
 
@@ -91,38 +91,4 @@ void CheckTemperature()
 
   LCDDisplayTemp(round(currentTemp), (int)currentSetpoint);
 }
-
-void DisplayTime()
-{
-  LCDDisplayTime(now());
-  LCDDisplayTemp(currentTemp, currentSetpoint);
-}
-
-//void IncreaseSetPoint()
-//{
-//  currentSetpoint = min(MAX_TEMP, setPoint + 1);
-//  LCDDisplayTemp((int)currentTemp, (int)setPoint);
-//}
-
-//void DecreaseSetPoint()
-//{
-//  currentSetpoint = max(MIN_TEMP, setPoint - 1);
-//  LCDDisplayTemp((int)currentTemp, (int)setPoint);
-//}
-
-//uint8_t debounceRead(int pin)
-//{
-//  uint8_t pinState = digitalRead(pin);
-//  uint32_t timeout = millis();
-//  while ((millis() - timeout) < 10)
-//  {
-//    if (digitalRead(pin) != pinState)
-//    {
-//      pinState = digitalRead(pin);
-//      timeout = millis();
-//    }
-//  }
-//
-//  return pinState;
-//}
 

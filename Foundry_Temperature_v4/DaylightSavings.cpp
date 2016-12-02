@@ -8,17 +8,17 @@
 
 #define CLOCK_DEBUG
 
+//Set your local UTC offsets here.  Once set correctly, no need to change these again. 
+long dst_UTC_offset = -4 * 3600;  //Daylight Savings time UTC offset, US Eastern Daylight Time           
+long std_UTC_offset = -5 * 3600;  //Standard Time UTC offset, US Eastern Standard Time
+
 //Set the next two DST changes for your locality in Unix time. Note - these time stamps must be UTC, 
 //  regardless of your location.  The timestamps here are for US.
 // Also note : you don't ever need to update these again. The code will automatically figure out
 // the correct times every time it starts up, using these two static references.
 //You can use this converter to get the unix time: http://www.onlineconversion.com/unix_time.htm
-time_t dst_start_seconds  = 1489284000; //Mar 12, 2017 2:00:00 EST
-time_t dst_end_seconds    = 1478397600; //Nov  6, 2016 2:00:00 EDST
-
-//Set your local UTC offsets here.  Once set correctly, no need to change these again. 
-long dst_UTC_offset = -4 * 3600;  //Daylight Savings time UTC offset, US Eastern Daylight Time           
-long std_UTC_offset = -5 * 3600;  //Standard Time UTC offset, US Eastern Standard Time
+time_t dst_start_seconds  = 1489284000 - std_UTC_offset; //Mar 12, 2017 2:00:00 EST, adjusted to UTC
+time_t dst_end_seconds    = 1478397600 - dst_UTC_offset; //Nov  6, 2016 2:00:00 EDST, adjusted to UTC
 
 //  Code will figure out correct current offset every time it starts up
 int cur_UTC_offset = 0;  //current UTC offset
@@ -124,38 +124,38 @@ time_t AdvanceDSTchange(time_t dstTime)
 
 //Our DST settings can be wrong when we first start up.  
 //This routine makes sure that everything is set correctly.
-void CorrectDSTsettings(time_t currentTime) 
+void CorrectDSTsettings(time_t currentUTCTime) 
 {
   #ifdef CLOCK_DEBUG
   char buf[32];
-  Serial.print("CorrectDSTsettings: currently "); Serial.print(FormatFullTime(currentTime, buf, 32)); Serial.println((0 == cur_UTC_offset)?" (UTC)":" (local)");
+  Serial.print("CorrectDSTsettings: currently "); Serial.print(FormatFullTime(currentUTCTime, buf, 32)); Serial.println(" (UTC)");
   #endif
 
   //First, make sure we're not behind the times.  DST change times should ALWAYS
   // be later than the current time
 
   #ifdef CLOCK_DEBUG
-  Serial.print("dst start time is "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32)); 
+  Serial.print("dst start time is "); Serial.print(FormatFullTime(dst_start_seconds, buf, 32));  Serial.println(" (UTC)");
   #endif
 
-  while (currentTime >= dst_start_seconds)
+  while (currentUTCTime >= dst_start_seconds)
   {
     dst_start_seconds = AdvanceDSTchange(dst_start_seconds);
   }
 
   #ifdef CLOCK_DEBUG
-  Serial.print("dst start time adjusted to "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32)); 
-  Serial.print("dst end time is "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); 
+  Serial.print("dst start time adjusted to "); Serial.print(FormatFullTime(dst_start_seconds, buf, 32));  Serial.println(" (UTC)");
+  Serial.print("dst end time is "); Serial.print(FormatFullTime(dst_end_seconds, buf, 32));  Serial.println(" (UTC)");
   #endif
 
   //now check the fall change
-  while (currentTime >= dst_end_seconds)
+  while (currentUTCTime >= dst_end_seconds)
   {
     dst_end_seconds = AdvanceDSTchange(dst_end_seconds);
   }
 
   #ifdef CLOCK_DEBUG
-  Serial.print("dst end time adjusted to "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); 
+  Serial.print("dst end time adjusted to "); Serial.print(FormatFullTime(dst_end_seconds, buf, 32));  Serial.println(" (UTC)");
   Serial.println("CorrectDSTsettings Advance DST Change complete"); 
   #endif
 
@@ -195,24 +195,24 @@ void CorrectDSTsettings(time_t currentTime)
   #endif
 }
 
-int Check_DST(time_t currentTime)
+int Check_DST(time_t currentLocalTime)
 {
   int doChange = 0;     //assume no change into or out of DST
- 
+  time_t currentUTCTime = currentLocalTime - cur_UTC_offset;  //adjust current time to UTC
+  
   #ifdef CLOCK_DEBUG
   char buf[32];
-  Serial.print("Check_DST: currently "); Serial.println(FormatFullTime(currentTime, buf, 32)); 
+  Serial.print("Check_DST: currently "); Serial.print(FormatFullTime(currentUTCTime, buf, 32)); Serial.print(" (UTC), "); 
+                                         Serial.print(FormatFullTime(currentLocalTime, buf, 32)); Serial.println(" (Local)"); 
   #endif
 
-  //CorrectDSTsettings(currentTime);        //make sure all our daylight savings time settings are correct
-
-  if (currentTime >= dst_start_seconds)
+  if (currentUTCTime >= dst_start_seconds)
   {
     doChange = 1;       //spring forward
   }
   else
   {
-    if (currentTime >= dst_end_seconds)
+    if (currentUTCTime >= dst_end_seconds)
     {
       doChange = -1;       //fall back
     }
@@ -239,7 +239,7 @@ void  UpdateDST(int doChange)
                                               // (e.g., Eastern Standard is UTC -5, Eastern daylight is UTC - 4)
       dst_start_seconds = AdvanceDSTchange(dst_start_seconds);    //advance clockInfo to next DST start time
       #ifdef CLOCK_DEBUG
-      Serial.print("dst start time adjusted to (UTC) "); Serial.println(FormatFullTime(dst_start_seconds, buf, 32));
+      Serial.print("dst start time adjusted to "); Serial.print(FormatFullTime(dst_start_seconds, buf, 32)); Serial.println(" (UTC)");
       Serial.print("current UTC offset is "); Serial.println(cur_UTC_offset); 
       #endif 
       break;
@@ -249,7 +249,7 @@ void  UpdateDST(int doChange)
                                               // (e.g., Eastern Standard is UTC -5, Eastern daylight is UTC - 4)
       dst_end_seconds = AdvanceDSTchange(dst_end_seconds);      //advance clockInfo to next DST end time
       #ifdef CLOCK_DEBUG
-      Serial.print("dst end time adjusted to (UTC) "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32));
+      Serial.print("dst end time adjusted to "); Serial.println(FormatFullTime(dst_end_seconds, buf, 32)); Serial.println(" (UTC)");
       Serial.print("current UTC offset is "); Serial.println(cur_UTC_offset); 
       #endif
       break;

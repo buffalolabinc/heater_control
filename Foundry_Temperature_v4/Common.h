@@ -23,6 +23,7 @@ extern WiFiClient client;
 extern float currentTemp;   //current average temperature read from sensors
 extern bool heat_on;      //heat status
 extern int currentSetpoint;    //current temperature set point
+extern volatile bool overrideEnabled;   //schedule override enabled
 
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #define max(a,b) (((a) > (b)) ? (a) : (b))
@@ -46,18 +47,19 @@ bool CheckAdafruitMQTT();
 void FeedAdafruitMQTT(float fahrenheit);
 
 //Daylight Savings Time functions
-void CorrectDSTsettings(time_t currentTime);
+void CorrectDSTsettings(time_t currentUTCTime);
 time_t AdvanceDSTchange(time_t dstTime);
-int Check_DST(time_t currentTime);
+int Check_DST(time_t currentLocalTime);
 void  UpdateDST(int doChange);
 
 //LCD display functions
 void InitLCD();
-//void LCDDisplayTime(time_t utcTime, int utcOffset);
+void LCDUpdateDisplay();
 void LCDDisplayTime(time_t localTime);
 void LCDDisplayTemp(int currentTemp, int setPoint);
 void LCDDisplayHeatStatus(bool onoff);
 void LCDDisplayIPAddress(const char* addressString);
+void LCDDisplayOverrideStatus(bool overrideEnabled);
 
 //Setpoint scheduler functions
 void InitScheduler();

@@ -76,3 +76,16 @@ void LCDDisplayIPAddress(const char* addressString)
   lcd.print(addressString);
 }
 
+void LCDDisplayOverrideStatus(bool overrideEnabled)
+{
+  lcd.setCursor(12, 2);
+  lcd.print(overrideEnabled ? "override" : "        ");
+}
+
+void LCDUpdateDisplay()
+{
+  LCDDisplayTime(now());
+  LCDDisplayTemp(currentTemp, currentSetpoint);
+  LCDDisplayOverrideStatus(overrideEnabled);
+}
+
