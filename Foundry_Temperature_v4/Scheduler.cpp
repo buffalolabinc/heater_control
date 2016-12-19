@@ -44,6 +44,7 @@ void UpdateSchedule()
     currentState = weekend;
     currentAlarm = Alarm.alarmOnce(0, 0, 1, UpdateSchedule);  //Set an alarm to expire  at midnight
     Serial.print("Weekend Schedule. current setpoint is "); Serial.println(currentSetpoint);
+    Serial.print("   current alarm is "); Serial.println(dtINVALID_ALARM_ID != currentAlarm?"valid":"invalid");
   }
   else
   {
@@ -54,7 +55,8 @@ void UpdateSchedule()
       currentState = daytime;
       currentAlarm = Alarm.alarmOnce(DAY_END_HOUR, DAY_END_MIN, 1, UpdateSchedule);  //Set an alarm to expire  at DAY_END
       Serial.print("Daytime Schedule. current setpoint is "); Serial.println(currentSetpoint);
-    }
+      Serial.print("   current alarm is "); Serial.println(dtINVALID_ALARM_ID != currentAlarm?"valid":"invalid");
+   }
     else
     {
       if (!overrideEnabled)
@@ -62,7 +64,8 @@ void UpdateSchedule()
       currentState = nighttime;
       currentAlarm = Alarm.alarmOnce(DAY_START_HOUR, DAY_START_MIN, 1, UpdateSchedule);  //Set an alarm to expire  at DAY_START
       Serial.print("Nighttime Schedule. current setpoint is "); Serial.println(currentSetpoint);
-    }
+      Serial.print("   current alarm is "); Serial.println(dtINVALID_ALARM_ID != currentAlarm?"valid":"invalid");
+   }
   }
   LCDDisplayTemp(currentTemp, currentSetpoint);
 }
@@ -82,7 +85,7 @@ void EndOverride()
     currentSetpoint = NIGHT_SETPOINT;
   
   Serial.print("end override. current setpoint is "); Serial.println(currentSetpoint);
-
+  Serial.print("   current alarm is "); Serial.println(dtINVALID_ALARM_ID != currentAlarm?"valid":"invalid");
 }
 
 void SetOverride()
@@ -97,6 +100,7 @@ void SetOverride()
    
     breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
     overrideAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, EndOverride);  //Set an alarm to expire exactly at the end of the override period
+    Serial.print("   override alarm is "); Serial.println(dtINVALID_ALARM_ID != overrideAlarm?"valid":"invalid");
   }
   else
   {
