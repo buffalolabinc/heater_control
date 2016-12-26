@@ -126,9 +126,14 @@ float ReadTempSensors()
   //Serial.println("No more addresses.");
   //Serial.println();
   ds.reset_search();
-  float avgCelsius = (sum / sensorCount) / 16.0;
-  float avgFahrenheit = celsius * 1.8 + 32.0;
-  return avgFahrenheit;
+  if (0 != sensorCount)
+  {
+    float avgCelsius = (sum / sensorCount) / 16.0;
+    float avgFahrenheit = avgCelsius * 1.8 + 32.0;
+    return avgFahrenheit;
+  }
+  else
+    return 0;
 }
 
 
