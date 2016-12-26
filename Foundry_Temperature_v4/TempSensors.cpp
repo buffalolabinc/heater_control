@@ -133,7 +133,7 @@ float ReadTempSensors()
     return avgFahrenheit;
   }
   else
-    return 0;
+    return 100.0;  //if no sensors, make sure heat doesn't come on.
 }
 
 
