@@ -11,14 +11,11 @@
 // Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
-// Setup a feed called 'button' for publishing changes.
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
-//const char TEMP1[] PROGMEM = AIO_USERNAME "/feeds/Foundry-temp1";
 Adafruit_MQTT_Publish temp1 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Foundry-temp1");
-//const char TEMP2[] PROGMEM = AIO_USERNAME "/feeds/Foundry-temp2";
-Adafruit_MQTT_Publish temp2 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Foundry-temp2");
+Adafruit_MQTT_Publish overrideFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/override-lab");
 //
-Adafruit_MQTT_Publish* tempSensorList[] = {&temp1, &temp2};
+Adafruit_MQTT_Publish* tempSensorList[] = {&temp1};
 
 typedef struct SensorMap_t
 {
@@ -42,6 +39,7 @@ void InitAdafruitMQTT()
   {
     sensorMap[s].feed = new Adafruit_MQTT_Publish(&mqtt, sensorMap[s].description);
   }
+  
 }
 
 // connect to adafruit io via MQTT
@@ -94,6 +92,8 @@ void FeedAdafruitMQTT(float fahrenheit)
 {
   Serial.print(F("MQTT feed"));
   if (! sensorMap[0].feed->publish(fahrenheit))
-    Serial.print(F(" failed."));
+    Serial.print(F(" sensor feed failed."));
+  if (! overrideFeed.publish(overrideEnabled))
+    Serial.print(F(" override feed failed."));
   Serial.println();
 }

@@ -29,7 +29,7 @@ void setup(void) {
   LCDUpdateDisplay();
   
   Alarm.timerRepeat(15, CheckTemperature);     //check temperature every 15 seconds
-  Alarm.timerRepeat(300, UpdateAdafruitMQTT); //Update MQTT every 5 minutes
+  Alarm.timerRepeat(270, UpdateAdafruitMQTT); //Update MQTT every 4.5 minutes (note - need this to be < 300 sec to keep MWTT alive).
   Alarm.timerRepeat(1, LCDUpdateDisplay);          //updates the LCD time display. Also bumps the NTP syncProvider timer
 
 //  pinMode(UP_BUTTON, INPUT_PULLUP);  //Only used with adjustable thermostat

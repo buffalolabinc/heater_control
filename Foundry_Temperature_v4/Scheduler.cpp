@@ -15,7 +15,8 @@ int currentState = off;
 
 #define OVERRIDE_DURATION (2 * 3600)  //Override schedule to day setpoint. Overrides last for 2 hours
 
-#define DAY_SETPOINT 65   // daytime temperature is set to 65 degrees
+#define OVERRIDE_SETPOINT 65   // override temperature is set to 65 degrees
+#define DAY_SETPOINT 55   // daytime temperature is set to 65 degrees
 #define NIGHT_SETPOINT 55  // nighttime temperature is set to 55 degrees
 
 //these are based on Time library definition of Sunday as day 1. There is no day 0.
@@ -88,27 +89,33 @@ void EndOverride()
   Serial.print("   current alarm is "); Serial.println(dtINVALID_ALARM_ID != currentAlarm?"valid":"invalid");
 }
 
+uint32_t overrideDebounce = 0;
 void SetOverride()
 {
   tmElements_t overrideExpiration;
 
-  if (!overrideEnabled)
+  if (millis() - overrideDebounce > 100)
   {
-    overrideEnabled = true;
+    overrideDebounce = millis();
     
-    currentSetpoint = DAY_SETPOINT;
-   
-    breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
-    overrideAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, EndOverride);  //Set an alarm to expire exactly at the end of the override period
-    Serial.print("   override alarm is "); Serial.println(dtINVALID_ALARM_ID != overrideAlarm?"valid":"invalid");
-  }
-  else
-  {
-    overrideEnabled = false;
-    Alarm.free(overrideAlarm);
-    if (daytime == currentState)
-      currentSetpoint = DAY_SETPOINT;
+    if (!overrideEnabled)
+    {
+      overrideEnabled = true;
+      
+      currentSetpoint = OVERRIDE_SETPOINT;
+     
+      breakTime(now() + OVERRIDE_DURATION, overrideExpiration);
+      overrideAlarm = Alarm.alarmOnce(overrideExpiration.Hour, overrideExpiration.Minute, overrideExpiration.Second, EndOverride);  //Set an alarm to expire exactly at the end of the override period
+      Serial.print("   override alarm is "); Serial.println(dtINVALID_ALARM_ID != overrideAlarm?"valid":"invalid");
+    }
     else
-      currentSetpoint = NIGHT_SETPOINT;
+    {
+      overrideEnabled = false;
+      Alarm.free(overrideAlarm);
+      if (daytime == currentState)
+        currentSetpoint = DAY_SETPOINT;
+      else
+        currentSetpoint = NIGHT_SETPOINT;
+    }
   }
 }
