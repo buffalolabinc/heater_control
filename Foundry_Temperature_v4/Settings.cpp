@@ -8,6 +8,8 @@ String cmdString;
 String argString;
 String rawString;
 
+bool mqttDirty = false;
+
 typedef enum Commands_t { server, port, user, key, temp, override, settings, save, cancel, menu, unknown};
 
 char* commandStrings[] = {
@@ -150,30 +152,48 @@ void ExecuteCommand()
     {
       case server:
         strncpy(eepromSettings.server, argString.c_str(), 256);
+        mqttDirty = true;
         break;
       case port:
-        eepromSettings.port, atoi(argString.c_str());
+        eepromSettings.port = atoi(argString.c_str());
+        mqttDirty = true;
         break;
       case user:
         strncpy(eepromSettings.user, argString.c_str(), 256);
+        mqttDirty = true;
         break;
       case key:
         strncpy(eepromSettings.key, argString.c_str(), 256);
         break;
       case temp:
         strncpy(eepromSettings.temp, argString.c_str(), 256);
+        mqttDirty = true;
         break;
       case override:
         strncpy(eepromSettings.override, argString.c_str(), 256);
+        mqttDirty = true;
         break;
       case settings:
         ShowSettings();
         break;
       case save:
         SaveSettings();
+        if (mqttDirty)
+        {
+          telnetClient.print("MQTT reconnect ");
+          if (ReinitAdafruitMQTT())
+          {
+            telnetClient.println("successful");
+            FeedAdafruitMQTT(currentTemp, overrideEnabled);
+          }
+          else
+             telnetClient.println("failed");           
+          mqttDirty = false;
+        }
         break;
       case cancel:
         CancelSettings();
+        mqttDirty = false;
         break;
       case menu:
         ShowMenu();

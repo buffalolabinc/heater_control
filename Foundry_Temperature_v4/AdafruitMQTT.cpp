@@ -1,10 +1,10 @@
 #include "Common.h"
 
 
-#define AIO_SERVER      "io.adafruit.com"
-#define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "adafruit_support_rick"
-#define AIO_KEY         "feb16361d6d145149e98d31f7d0da75d"
+//#define AIO_SERVER      "io.adafruit.com"
+//#define AIO_SERVERPORT  1883
+//#define AIO_USERNAME    "adafruit_support_rick"
+//#define AIO_KEY         "feb16361d6d145149e98d31f7d0da75d"
 //#define AIO_USERNAME    "kfl"
 //#define AIO_KEY         "bc273dc3882941ddbc67b6b0928a8d55"
 
@@ -38,6 +38,10 @@ Adafruit_MQTT_Publish* overrideFeed;
 void InitAdafruitMQTT()
 {
   String feedStr;
+
+  if (mqtt) delete mqtt;
+  if (tempFeed) delete tempFeed;
+  if (overrideFeed) delete overrideFeed;
   
   mqtt = new Adafruit_MQTT_Client(&client, GetMQTTServer(), GetMQTTPort(), GetMQTTUser(), GetMQTTKey());
   feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTTemp();
@@ -51,6 +55,13 @@ void InitAdafruitMQTT()
 //    sensorMap[s].feed = new Adafruit_MQTT_Publish(mqtt, sensorMap[s].description);
 //  }
   
+}
+
+bool ReinitAdafruitMQTT()
+{
+  mqtt->disconnect();
+  InitAdafruitMQTT();
+  return ConnectAdafruitMQTT();
 }
 
 // connect to adafruit io via MQTT
@@ -99,7 +110,7 @@ bool CheckAdafruitMQTT()
   return isConnected;
 }
 
-void FeedAdafruitMQTT(float fahrenheit)
+void FeedAdafruitMQTT(float fahrenheit, bool overrideEnabled)
 {
   Serial.print(F("MQTT feed"));
 //  if (! sensorMap[0].feed->publish(fahrenheit))

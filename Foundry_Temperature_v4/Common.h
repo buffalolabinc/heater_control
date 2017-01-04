@@ -47,9 +47,10 @@ float ReadTempSensors();
 
 //MQTT functions
 void InitAdafruitMQTT();
+bool ReinitAdafruitMQTT();
 bool ConnectAdafruitMQTT();
 bool CheckAdafruitMQTT();
-void FeedAdafruitMQTT(float fahrenheit);
+void FeedAdafruitMQTT(float fahrenheit, bool overrideEnabled);
 
 //Daylight Savings Time functions
 void CorrectDSTsettings(time_t currentUTCTime);
