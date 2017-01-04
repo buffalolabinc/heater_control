@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
@@ -69,3 +70,13 @@ void SetOverride();
 //ESP8266 Over-The-Air (OTA) uploader
 void InitOTA();
 void HandleOTA();
+
+//Telnet settings handler
+void SettingsInit();
+void ProcessSettings();
+char* GetMQTTServer();
+int GetMQTTPort();
+char* GetMQTTUser();
+char* GetMQTTKey();
+char* GetMQTTTemp();
+char* GetMQTTOverride();

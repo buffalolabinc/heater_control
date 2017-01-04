@@ -10,6 +10,8 @@ void setup(void) {
   InitLCD();
 
   WiFiInit();   // Connect to WiFi access point.
+  
+  SettingsInit();
 
   InitOTA();
 
@@ -46,6 +48,7 @@ void loop(void)
   Alarm.delay(50);  //alarm callbacks run in here
   yield();  //make the ESP8266 happy
   HandleOTA();
+  ProcessSettings();
 }
 
 void syncDST()
