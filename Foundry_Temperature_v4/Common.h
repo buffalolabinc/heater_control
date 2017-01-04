@@ -8,6 +8,10 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
+#include "Wire.h"
+#include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
+
+
 #include "Time.h"
 #include "TimeAlarms.h"
 

@@ -1,7 +1,4 @@
 // include the library code:
-#include "Wire.h"
-//#include "Adafruit_LiquidCrystal.h"
-#include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
 
 #include "Common.h"
 
