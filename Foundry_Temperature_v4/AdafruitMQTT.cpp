@@ -35,21 +35,22 @@ Adafruit_MQTT_Publish* setFeed;
 
 #define NUM_SENSORS (sizeof(sensorMap)/sizeof(SensorMap_t))
 
+String tempFeedStr; //need to use globals for these. Adafruit_MQTT_Client doesn't make a copy of the data - it just uses a pointer
+String setFeedStr;  // so we can't use a local variable in InitAdafruitMQTT()
+
 void InitAdafruitMQTT()
 {
-  String feedStr;
-
   if (mqtt) delete mqtt;
   if (tempFeed) delete tempFeed;
   if (setFeed) delete setFeed;
   
   mqtt = new Adafruit_MQTT_Client(&client, GetMQTTServer(), GetMQTTPort(), GetMQTTUser(), GetMQTTKey());
-  feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTTempfeed();
-  Serial.println(feedStr);
-  tempFeed = new Adafruit_MQTT_Publish(mqtt,  feedStr.c_str());
-  feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTSetfeed();
-  Serial.println(feedStr);
-  setFeed = new Adafruit_MQTT_Publish(mqtt, feedStr.c_str());
+  tempFeedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTTempfeed();
+  Serial.println(tempFeedStr);
+  tempFeed = new Adafruit_MQTT_Publish(mqtt,  tempFeedStr.c_str());
+  setFeedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTSetfeed();
+  Serial.println(setFeedStr);
+  setFeed = new Adafruit_MQTT_Publish(mqtt, setFeedStr.c_str());
 
 //  //initialize sensor map
 //  for (int s = 0; s < NUM_SENSORS; s++)
