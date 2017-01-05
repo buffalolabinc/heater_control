@@ -300,6 +300,7 @@ void ProcessSettings()
     telnetClient.println();
     telnetClient.print("> ");
     telnetClient.flush();
+    Serial.println("telnet connected");
   }
   if (telnetClient.connected())
   {

@@ -13,8 +13,8 @@
 Adafruit_MQTT_Client* mqtt;
 
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
-//Adafruit_MQTT_Publish temp1 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Temp-Lab");
-//Adafruit_MQTT_Publish overrideFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/SetPoint-Lab");
+//Adafruit_MQTT_Publish tempfeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Temp-Lab");
+//Adafruit_MQTT_Publish setfeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/SetPoint-Lab");
 Adafruit_MQTT_Publish* tempFeed;
 Adafruit_MQTT_Publish* setFeed;
 
