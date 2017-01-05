@@ -13,10 +13,10 @@
 Adafruit_MQTT_Client* mqtt;
 
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
-//Adafruit_MQTT_Publish temp1 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Foundry-temp1");
-//Adafruit_MQTT_Publish overrideFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/override-lab");
+//Adafruit_MQTT_Publish temp1 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Temp-Lab");
+//Adafruit_MQTT_Publish overrideFeed = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/SetPoint-Lab");
 Adafruit_MQTT_Publish* tempFeed;
-Adafruit_MQTT_Publish* overrideFeed;
+Adafruit_MQTT_Publish* setFeed;
 
 //Adafruit_MQTT_Publish* tempSensorList[] = {&temp1};
 
@@ -41,13 +41,15 @@ void InitAdafruitMQTT()
 
   if (mqtt) delete mqtt;
   if (tempFeed) delete tempFeed;
-  if (overrideFeed) delete overrideFeed;
+  if (setFeed) delete setFeed;
   
   mqtt = new Adafruit_MQTT_Client(&client, GetMQTTServer(), GetMQTTPort(), GetMQTTUser(), GetMQTTKey());
-  feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTTemp();
+  feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTTempfeed();
+  Serial.println(feedStr);
   tempFeed = new Adafruit_MQTT_Publish(mqtt,  feedStr.c_str());
-  feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTOverride();
-  overrideFeed = new Adafruit_MQTT_Publish(mqtt, feedStr.c_str());
+  feedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTSetfeed();
+  Serial.println(feedStr);
+  setFeed = new Adafruit_MQTT_Publish(mqtt, feedStr.c_str());
 
 //  //initialize sensor map
 //  for (int s = 0; s < NUM_SENSORS; s++)
@@ -110,14 +112,14 @@ bool CheckAdafruitMQTT()
   return isConnected;
 }
 
-void FeedAdafruitMQTT(float fahrenheit, bool overrideEnabled)
+void FeedAdafruitMQTT(float fahrenheit, int setpoint)
 {
   Serial.print(F("MQTT feed"));
 //  if (! sensorMap[0].feed->publish(fahrenheit))
 //    Serial.print(F(" sensor feed failed."));
   if (! tempFeed->publish(fahrenheit))
-    Serial.print(F(" sensor feed failed."));
-  if (! overrideFeed->publish(overrideEnabled))
-    Serial.print(F(" override feed failed."));
+    Serial.print(F(" temperature feed failed."));
+  if (! setFeed->publish(setpoint))
+    Serial.print(F(" setpoint feed failed."));
   Serial.println();
 }

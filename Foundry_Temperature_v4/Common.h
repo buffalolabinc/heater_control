@@ -50,7 +50,7 @@ void InitAdafruitMQTT();
 bool ReinitAdafruitMQTT();
 bool ConnectAdafruitMQTT();
 bool CheckAdafruitMQTT();
-void FeedAdafruitMQTT(float fahrenheit, bool overrideEnabled);
+void FeedAdafruitMQTT(float fahrenheit, int setpoint);
 
 //Daylight Savings Time functions
 void CorrectDSTsettings(time_t currentUTCTime);
@@ -83,5 +83,12 @@ char* GetMQTTServer();
 int GetMQTTPort();
 char* GetMQTTUser();
 char* GetMQTTKey();
-char* GetMQTTTemp();
-char* GetMQTTOverride();
+char* GetMQTTTempfeed();
+char* GetMQTTSetfeed();
+int GetDaySetpoint();
+int GetNightSetpoint();
+int GetOverrideSetpoint();
+long GetOverrideDuration();
+int GetDayStart();
+int GetDayEnd();
+

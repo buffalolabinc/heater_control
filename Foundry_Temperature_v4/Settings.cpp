@@ -10,15 +10,21 @@ String rawString;
 
 bool mqttDirty = false;
 
-typedef enum Commands_t { server, port, user, key, temp, override, settings, save, cancel, menu, unknown};
+typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, settings, save, cancel, menu, unknown};
 
 char* commandStrings[] = {
                           "server",
                           "port",
                           "user",
                           "key",
-                          "temp",
+                          "tempfeed",
+                          "setfeed",
+                          "day",
+                          "night",
                           "override",
+                          "overrideLen",
+                          "dayStart",
+                          "dayEnd",
                           "settings",
                           "save",
                           "cancel",
@@ -26,47 +32,82 @@ char* commandStrings[] = {
                          };
 
 typedef struct {
+    long header;
     char server[256];
     int  port;
     char user[256];
     char key[256];
-    char temp[256];
-    char override[256];
+    char tempfeed[256];
+    char setfeed[256];
+    int  daySet;
+    int  nightSet;
+    int  overrideSet;
+    int  overrideLen;
+    int  dayStart;
+    int  dayEnd;
 } Settings_t;
 
 Settings_t eepromSettings;
 
+Settings_t defaultSettings = {
+                                0xa5a5a5a5,         //header
+                                "io.adafruit.com",  //server
+                                1883,               //port
+                                "",                 //user
+                                "",                 //key
+                                "",                 //tempFeed
+                                "",                 //setFeed
+                                55,                 //daySet
+                                55,                 //nightSet
+                                65,                 //overrideSet
+                                120,                //overrideLen
+                                730,                //dayStart
+                                1800                //dayEnd                            
+                              };
 
 void ShowMenu()
 {
   telnetClient.println("Menu:");
-  telnetClient.println("  server    mqttAddress   # set MQTT server");
-  telnetClient.println("  port      mqttPort      # set MQTT port");
-  telnetClient.println("  user      mqttUserName  # set MQTT user name");
-  telnetClient.println("  key       mqttKey       # set MQTT key");
-  telnetClient.println("  temp      feedName      # set MQTT temperature feed");
-  telnetClient.println("  override  feedName      # set MQTT override feed");
-  telnetClient.println("  settings                # print current settings");
-  telnetClient.println("  save                    # save current settings");
-  telnetClient.println("  cancel                  # cancel changes");
-  telnetClient.println("  ?                       # print this menu");
+  telnetClient.println("  server       mqttAddress   # set MQTT server");
+  telnetClient.println("  port         mqttPort      # set MQTT port");
+  telnetClient.println("  user         mqttUserName  # set MQTT user name");
+  telnetClient.println("  key          mqttKey       # set MQTT key");
+  telnetClient.println("  tempfeed     feedName      # set MQTT temperature feed");
+  telnetClient.println("  setfeed      feedName      # set MQTT setpoint feed");
+  telnetClient.println("  day          setPoint      # set daytime set-point");
+  telnetClient.println("  night        setPoint      # set night set-point");
+  telnetClient.println("  override     setPoint      # set override set-point");
+  telnetClient.println("  overrideLen  minutes       # set override duration (minutes)");
+  telnetClient.println("  dayStart     time          # set day start time (hour*100 + min)");
+  telnetClient.println("  dayEnd       time          # set day end time (hour*100 + min)");
+  telnetClient.println("  settings                   # print current settings");
+  telnetClient.println("  save                       # save current settings");
+  telnetClient.println("  cancel                     # cancel changes");
+  telnetClient.println("  ?                          # print this menu");
   telnetClient.println();
 }
 
 void ShowSettings()
 {
   telnetClient.println("Current Settings:");
-  telnetClient.print("  server  :  "); telnetClient.println(eepromSettings.server);
-  telnetClient.print("  port    :  "); telnetClient.println(eepromSettings.port);
-  telnetClient.print("  user    :  "); telnetClient.println(eepromSettings.user);
-  telnetClient.print("  key     :  "); telnetClient.println(eepromSettings.key);
-  telnetClient.print("  temp    :  "); telnetClient.println(eepromSettings.temp);
-  telnetClient.print("  override:  "); telnetClient.println(eepromSettings.override);
+  telnetClient.print("  server     :  "); telnetClient.println(eepromSettings.server);
+  telnetClient.print("  port       :  "); telnetClient.println(eepromSettings.port);
+  telnetClient.print("  user       :  "); telnetClient.println(eepromSettings.user);
+  telnetClient.print("  key        :  "); telnetClient.println(eepromSettings.key);
+  telnetClient.print("  tempfeed   :  "); telnetClient.println(eepromSettings.tempfeed);
+  telnetClient.print("  setfeed    :  "); telnetClient.println(eepromSettings.setfeed);
+  telnetClient.print("  day        :  "); telnetClient.println(eepromSettings.daySet);
+  telnetClient.print("  night      :  "); telnetClient.println(eepromSettings.nightSet);
+  telnetClient.print("  override   :  "); telnetClient.println(eepromSettings.overrideSet);
+  telnetClient.print("  overrideLen:  "); telnetClient.println(eepromSettings.overrideLen);
+  telnetClient.print("  dayStart   :  "); telnetClient.println(eepromSettings.dayStart);
+  telnetClient.print("  dayEnd     :  "); telnetClient.println(eepromSettings.dayEnd);
   telnetClient.println();
 }
 
 void SaveSettings()
 {
+  eepromSettings.header = 0xa5a5a5a5;
   EEPROM.put(0, eepromSettings);
   EEPROM.commit();
 }
@@ -76,10 +117,11 @@ void CancelSettings()
    EEPROM.get(0, eepromSettings); 
 }
 
-void EEPROMInit()
+bool EEPROMInit()
 {
   EEPROM.begin(sizeof(Settings_t));
   EEPROM.get(0, eepromSettings);
+  return (eepromSettings.header == 0xa5a5a5a5);
 }
 
 int FindCmdIndex()
@@ -165,26 +207,47 @@ void ExecuteCommand()
       case key:
         strncpy(eepromSettings.key, argString.c_str(), 256);
         break;
-      case temp:
-        strncpy(eepromSettings.temp, argString.c_str(), 256);
+      case tempfeed:
+        strncpy(eepromSettings.tempfeed, argString.c_str(), 256);
         mqttDirty = true;
         break;
-      case override:
-        strncpy(eepromSettings.override, argString.c_str(), 256);
+      case setfeed:
+        strncpy(eepromSettings.setfeed, argString.c_str(), 256);
         mqttDirty = true;
         break;
+      case daySet:
+        eepromSettings.daySet = atoi(argString.c_str());
+        break;
+      case nightSet:
+        eepromSettings.nightSet = atoi(argString.c_str());
+        break;
+      case overrideSet:
+        eepromSettings.overrideSet = atoi(argString.c_str());
+        break;
+      case overrideLen:
+        eepromSettings.overrideLen = atoi(argString.c_str());
+        break;      
+      case dayStart:
+        eepromSettings.dayStart = atoi(argString.c_str());
+        break;
+      case dayEnd:
+        eepromSettings.dayEnd = atoi(argString.c_str());
+        break;      
       case settings:
         ShowSettings();
         break;
       case save:
         SaveSettings();
+
+        UpdateSchedule();
+        
         if (mqttDirty)
         {
           telnetClient.print("MQTT reconnect ");
           if (ReinitAdafruitMQTT())
           {
             telnetClient.println("successful");
-            FeedAdafruitMQTT(currentTemp, overrideEnabled);
+            FeedAdafruitMQTT(currentTemp, currentSetpoint);
           }
           else
              telnetClient.println("failed");           
@@ -220,7 +283,11 @@ void SettingsInit()
   cmdString.reserve(256);
   argString.reserve(256);
 
-  EEPROMInit();
+  if (!EEPROMInit())
+  {
+    memcpy(&eepromSettings, &defaultSettings, sizeof(Settings_t));
+    SaveSettings();
+  }
 }
 
 
@@ -262,13 +329,43 @@ char* GetMQTTKey()
   return eepromSettings.key;
 }
 
-char* GetMQTTTemp()
+char* GetMQTTTempfeed()
 {
-  return eepromSettings.temp;
+  return eepromSettings.tempfeed;
 }
 
-char* GetMQTTOverride()
+char* GetMQTTSetfeed()
 {
-  return eepromSettings.override;
+  return eepromSettings.setfeed;
+}
+
+int GetDaySetpoint()
+{
+  return eepromSettings.daySet;
+}
+
+int GetNightSetpoint()
+{
+  return eepromSettings.nightSet;
+}
+
+int GetOverrideSetpoint()
+{
+  return eepromSettings.overrideSet;
+}
+
+long GetOverrideDuration()
+{
+  return eepromSettings.overrideLen * 60; //return duration in seconds
+}
+
+int GetDayStart()
+{
+  return eepromSettings.dayStart;
+}
+
+int GetDayEnd()
+{
+  return eepromSettings.dayEnd;
 }
 
