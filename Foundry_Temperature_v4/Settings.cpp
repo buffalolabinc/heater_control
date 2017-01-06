@@ -47,7 +47,8 @@ typedef struct {
     int  dayEnd;
 } Settings_t;
 
-Settings_t eepromSettings;
+Settings_t eepromSettings;  //current eeprom settings (mirror of eeprom)
+Settings_t editSettings;    // editable copy of current settings
 
 Settings_t defaultSettings = {
                                 0xa5a5a5a5,         //header
@@ -90,23 +91,24 @@ void ShowMenu()
 void ShowSettings()
 {
   telnetClient.println("Current Settings:");
-  telnetClient.print("  server     :  "); telnetClient.println(eepromSettings.server);
-  telnetClient.print("  port       :  "); telnetClient.println(eepromSettings.port);
-  telnetClient.print("  user       :  "); telnetClient.println(eepromSettings.user);
-  telnetClient.print("  key        :  "); telnetClient.println(eepromSettings.key);
-  telnetClient.print("  tempfeed   :  "); telnetClient.println(eepromSettings.tempfeed);
-  telnetClient.print("  setfeed    :  "); telnetClient.println(eepromSettings.setfeed);
-  telnetClient.print("  day        :  "); telnetClient.println(eepromSettings.daySet);
-  telnetClient.print("  night      :  "); telnetClient.println(eepromSettings.nightSet);
-  telnetClient.print("  override   :  "); telnetClient.println(eepromSettings.overrideSet);
-  telnetClient.print("  overrideLen:  "); telnetClient.println(eepromSettings.overrideLen);
-  telnetClient.print("  dayStart   :  "); telnetClient.println(eepromSettings.dayStart);
-  telnetClient.print("  dayEnd     :  "); telnetClient.println(eepromSettings.dayEnd);
+  telnetClient.print("  server     :  "); telnetClient.println(editSettings.server);
+  telnetClient.print("  port       :  "); telnetClient.println(editSettings.port);
+  telnetClient.print("  user       :  "); telnetClient.println(editSettings.user);
+  telnetClient.print("  key        :  "); telnetClient.println(editSettings.key);
+  telnetClient.print("  tempfeed   :  "); telnetClient.println(editSettings.tempfeed);
+  telnetClient.print("  setfeed    :  "); telnetClient.println(editSettings.setfeed);
+  telnetClient.print("  day        :  "); telnetClient.println(editSettings.daySet);
+  telnetClient.print("  night      :  "); telnetClient.println(editSettings.nightSet);
+  telnetClient.print("  override   :  "); telnetClient.println(editSettings.overrideSet);
+  telnetClient.print("  overrideLen:  "); telnetClient.println(editSettings.overrideLen);
+  telnetClient.print("  dayStart   :  "); telnetClient.println(editSettings.dayStart);
+  telnetClient.print("  dayEnd     :  "); telnetClient.println(editSettings.dayEnd);
   telnetClient.println();
 }
 
 void SaveSettings()
 {
+  memcpy(&eepromSettings, &editSettings, sizeof(Settings_t)); //commit editable copy to current settings
   eepromSettings.header = 0xa5a5a5a5;
   EEPROM.put(0, eepromSettings);
   EEPROM.commit();
@@ -114,7 +116,8 @@ void SaveSettings()
 
 void CancelSettings()
 {
-   EEPROM.get(0, eepromSettings); 
+//   EEPROM.get(0, eepromSettings); 
+   memcpy(&editSettings, &eepromSettings, sizeof(Settings_t)); //get editable copy of current settings
 }
 
 bool EEPROMInit()
@@ -193,45 +196,45 @@ void ExecuteCommand()
     switch (FindCmdIndex())
     {
       case server:
-        strncpy(eepromSettings.server, argString.c_str(), 256);
+        strncpy(editSettings.server, argString.c_str(), 256);
         mqttDirty = true;
         break;
       case port:
-        eepromSettings.port = atoi(argString.c_str());
+        editSettings.port = atoi(argString.c_str());
         mqttDirty = true;
         break;
       case user:
-        strncpy(eepromSettings.user, argString.c_str(), 256);
+        strncpy(editSettings.user, argString.c_str(), 256);
         mqttDirty = true;
         break;
       case key:
-        strncpy(eepromSettings.key, argString.c_str(), 256);
+        strncpy(editSettings.key, argString.c_str(), 256);
         break;
       case tempfeed:
-        strncpy(eepromSettings.tempfeed, argString.c_str(), 256);
+        strncpy(editSettings.tempfeed, argString.c_str(), 256);
         mqttDirty = true;
         break;
       case setfeed:
-        strncpy(eepromSettings.setfeed, argString.c_str(), 256);
+        strncpy(editSettings.setfeed, argString.c_str(), 256);
         mqttDirty = true;
         break;
       case daySet:
-        eepromSettings.daySet = atoi(argString.c_str());
+        editSettings.daySet = atoi(argString.c_str());
         break;
       case nightSet:
-        eepromSettings.nightSet = atoi(argString.c_str());
+        editSettings.nightSet = atoi(argString.c_str());
         break;
       case overrideSet:
-        eepromSettings.overrideSet = atoi(argString.c_str());
+        editSettings.overrideSet = atoi(argString.c_str());
         break;
       case overrideLen:
-        eepromSettings.overrideLen = atoi(argString.c_str());
+        editSettings.overrideLen = atoi(argString.c_str());
         break;      
       case dayStart:
-        eepromSettings.dayStart = atoi(argString.c_str());
+        editSettings.dayStart = atoi(argString.c_str());
         break;
       case dayEnd:
-        eepromSettings.dayEnd = atoi(argString.c_str());
+        editSettings.dayEnd = atoi(argString.c_str());
         break;      
       case settings:
         ShowSettings();
@@ -301,6 +304,7 @@ void ProcessSettings()
     telnetClient.print("> ");
     telnetClient.flush();
     Serial.println("telnet connected");
+    memcpy(&editSettings, &eepromSettings, sizeof(Settings_t));  //get editable copy of current settings
   }
   if (telnetClient.connected())
   {
