@@ -39,9 +39,9 @@ typedef struct {
     char key[256];
     char tempfeed[256];
     char setfeed[256];
-    int  daySet;
-    int  nightSet;
-    int  overrideSet;
+    float  daySet;
+    float  nightSet;
+    float  overrideSet;
     int  overrideLen;
     int  dayStart;
     int  dayEnd;
@@ -219,13 +219,13 @@ void ExecuteCommand()
         mqttDirty = true;
         break;
       case daySet:
-        editSettings.daySet = atoi(argString.c_str());
+        editSettings.daySet = atof(argString.c_str());
         break;
       case nightSet:
-        editSettings.nightSet = atoi(argString.c_str());
+        editSettings.nightSet = atof(argString.c_str());
         break;
       case overrideSet:
-        editSettings.overrideSet = atoi(argString.c_str());
+        editSettings.overrideSet = atof(argString.c_str());
         break;
       case overrideLen:
         editSettings.overrideLen = atoi(argString.c_str());
@@ -344,17 +344,17 @@ char* GetMQTTSetfeed()
   return eepromSettings.setfeed;
 }
 
-int GetDaySetpoint()
+float GetDaySetpoint()
 {
   return eepromSettings.daySet;
 }
 
-int GetNightSetpoint()
+float GetNightSetpoint()
 {
   return eepromSettings.nightSet;
 }
 
-int GetOverrideSetpoint()
+float GetOverrideSetpoint()
 {
   return eepromSettings.overrideSet;
 }
