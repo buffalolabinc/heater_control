@@ -4,24 +4,44 @@
 // Create an ESP8266 WiFiClient class.
 WiFiClient client;
 
-#define WLAN_SSID       "BuffaloLab"
-#define WLAN_PASS       "M4k3Stuff"
+//#define WLAN_SSID       "BuffaloLab"
+//#define WLAN_PASS       "M4k3Stuff"
+#define WLAN_SSID       "Express"
+#define WLAN_PASS       "fepulatorfepu"
 
-void WiFiInit(void) {
+bool WiFiInit(void) {
+  int retries = 40;
+  bool connected = false;
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    WiFi.disconnect();
+    delay(1000);
+  }
+  
   Serial.print(F("Connecting to "));
-  Serial.println(WLAN_SSID);
+//  Serial.println(WLAN_SSID);
+  Serial.println(GetSSID());
 
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-  while (WiFi.status() != WL_CONNECTED) {
+//  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  WiFi.begin(GetSSID(), GetPassword());
+  while ((retries--) && (WiFi.status() != WL_CONNECTED)) {
     delay(500);
     Serial.print(F("."));
   }
   Serial.println();
-
-  Serial.println(F("WiFi connected"));
-  Serial.println(F("IP address: "));
-  Serial.println(WiFi.localIP());
+  connected = (WiFi.status() == WL_CONNECTED);
+  if (connected)
+  {
+    Serial.println(F("WiFi connected"));
+    Serial.println(F("IP address: "));
+    Serial.println(WiFi.localIP());
+  }
+  else
+  {
+    Serial.println(F("WiFi NOT connected.  Will try again in 1 minute"));
+  }
   LCDDisplayIPAddress(WiFi.localIP().toString().c_str());
+  return connected;
 }
-
 

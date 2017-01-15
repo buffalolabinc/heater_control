@@ -34,7 +34,7 @@ extern volatile bool overrideEnabled;   //schedule override enabled
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 
 // WiFi functions
-void WiFiInit(void);
+bool WiFiInit(void);
 
 //NTP functions
 void InitNTP();
@@ -70,6 +70,7 @@ void LCDDisplayOverrideStatus(bool overrideEnabled);
 //Setpoint scheduler functions
 void InitScheduler();
 void UpdateSchedule();
+void UpdateOverride();
 void SetOverride();
 
 //ESP8266 Over-The-Air (OTA) uploader
@@ -77,7 +78,9 @@ void InitOTA();
 void HandleOTA();
 
 //Telnet settings handler
+void TelnetInit();
 void SettingsInit();
+void SerialBackdoor();
 void ProcessSettings();
 char* GetMQTTServer();
 int GetMQTTPort();
@@ -91,4 +94,5 @@ float GetOverrideSetpoint();
 long GetOverrideDuration();
 int GetDayStart();
 int GetDayEnd();
-
+char* GetSSID();
+char* GetPassword();

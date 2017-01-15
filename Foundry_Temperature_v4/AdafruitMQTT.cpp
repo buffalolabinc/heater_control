@@ -103,12 +103,17 @@ bool ConnectAdafruitMQTT() {
 
 bool CheckAdafruitMQTT()
 {
-  bool isConnected = true;
-  // ping adafruit io a few times to make sure we remain connected
-  if(! mqtt->ping(3)) {
-    // reconnect to adafruit io
-    if(! mqtt->connected())
-      isConnected = ConnectAdafruitMQTT();
+  bool isConnected = false;
+  if (mqtt)
+  {
+    // ping adafruit io a few times to make sure we remain connected
+    if(! mqtt->ping(3)) {
+      // reconnect to adafruit io
+      if(! mqtt->connected())
+        isConnected = ConnectAdafruitMQTT();
+    }
+    else
+      isConnected = true;
   }
   return isConnected;
 }

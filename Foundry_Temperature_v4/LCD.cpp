@@ -30,6 +30,8 @@ void InitLCD()
   lcd.begin(20, 4);
   lcd.setBacklightPin(BACKLIGHT_PIN, POSITIVE);
   lcd.setBacklight(LED_ON);
+  lcd.setCursor(0, 3);
+  lcd.print("               ");  //clear IP address display area
 }
 
 //void LCDDisplayTime(time_t utcTime, int utcOffset)
@@ -69,6 +71,8 @@ void LCDDisplayHeatStatus(bool onoff)
 
 void LCDDisplayIPAddress(const char* addressString)
 {
+  lcd.setCursor(0, 3);
+  lcd.print("               ");  //clear display area
   lcd.setCursor(0, 3);
   lcd.print(addressString);
 }

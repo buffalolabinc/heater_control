@@ -1,29 +1,32 @@
 #include "Common.h"
 
 bool heat_on = false;
+AlarmID_t dstAlarm;
 
 void setup(void) {
   Serial.begin(115200);
 
   pinMode(RELAY_PIN, OUTPUT);
 
-  InitLCD();
-
-  WiFiInit();   // Connect to WiFi access point.
-  
   SettingsInit();
+  SerialBackdoor();
 
-  InitOTA();
-
+  InitLCD();
   InitTempSensors();
-
-  InitAdafruitMQTT();
-  ConnectAdafruitMQTT();  // connect to adafruit io
-
-  InitNTP();
-
-  syncDST();  //initialize DST settings, start hourly alarm.
-
+  
+  if (WiFiInit())   // Connect to WiFi access point.
+  {
+    TelnetInit();
+    InitOTA();
+    
+    InitAdafruitMQTT();
+    ConnectAdafruitMQTT();  // connect to adafruit io
+    
+    InitNTP();
+    
+    syncDST();  //initialize DST settings, start hourly alarm.
+  }
+  
   InitScheduler();  //initialize temperature setpoint scheduler
 
   CheckTemperature();
@@ -33,6 +36,7 @@ void setup(void) {
   Alarm.timerRepeat(15, CheckTemperature);     //check temperature every 15 seconds
   Alarm.timerRepeat(270, UpdateAdafruitMQTT); //Update MQTT every 4.5 minutes (note - need this to be < 300 sec to keep MWTT alive).
   Alarm.timerRepeat(1, LCDUpdateDisplay);          //updates the LCD time display. Also bumps the NTP syncProvider timer
+  Alarm.timerRepeat(60, CheckWiFi);          //checks that WiFi is still connected
 
 //  pinMode(UP_BUTTON, INPUT_PULLUP);  //Only used with adjustable thermostat
 //  pinMode(DOWN_BUTTON, INPUT_PULLUP);  //Only used with adjustable thermostat
@@ -58,7 +62,8 @@ void syncDST()
   
   int dstHour = (hour()+1 % 24);   //Get the next hour from now.
   //Set an alarm to expire exactly on the next hour, so we can check for DST change
-  Alarm.alarmOnce(dstHour, 0, 0, syncDST);
+  if (!Alarm.isAllocated(dstAlarm))
+    dstAlarm = Alarm.alarmOnce(dstHour, 0, 0, syncDST);
   Serial.print("Next check for DST change at "); Serial.print(dstHour); Serial.print(":00"); Serial.println(" (Local)");
 
 }
@@ -94,4 +99,25 @@ void CheckTemperature()
 
   LCDDisplayTemp(round(currentTemp), (int)currentSetpoint);
 }
+
+void CheckWiFi()
+{
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println(F("WiFi connection lost"));
+    if (WiFiInit())
+    {
+      TelnetInit();
+      InitOTA();
+      
+      InitAdafruitMQTT();
+      ConnectAdafruitMQTT();  // connect to adafruit io
+      
+      InitNTP();
+      
+      syncDST();  //initialize DST settings, start hourly alarm.
+    }
+  }
+  LCDDisplayIPAddress(WiFi.localIP().toString().c_str());
+}
+
 

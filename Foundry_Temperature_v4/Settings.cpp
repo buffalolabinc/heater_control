@@ -9,8 +9,9 @@ String argString;
 String rawString;
 
 bool mqttDirty = false;
+bool wifiDirty = false;
 
-typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, settings, save, cancel, menu, unknown};
+typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, ssid, password, settings, save, cancel, menu, unknown};
 
 char* commandStrings[] = {
                           "server",
@@ -25,6 +26,8 @@ char* commandStrings[] = {
                           "overrideLen",
                           "dayStart",
                           "dayEnd",
+                          "ssid",
+                          "password",
                           "settings",
                           "save",
                           "cancel",
@@ -45,6 +48,8 @@ typedef struct {
     int  overrideLen;
     int  dayStart;
     int  dayEnd;
+    char ssid[32];
+    char password[32];
 } Settings_t;
 
 Settings_t eepromSettings;  //current eeprom settings (mirror of eeprom)
@@ -63,7 +68,9 @@ Settings_t defaultSettings = {
                                 65,                 //overrideSet
                                 120,                //overrideLen
                                 730,                //dayStart
-                                1800                //dayEnd                            
+                                1800,               //dayEnd  
+                                "BuffaloLab",       //ssid
+                                "M4k3Stuff"         //password                          
                               };
 
 void ShowMenu()
@@ -79,8 +86,10 @@ void ShowMenu()
   telnetClient.println("  night        setPoint      # set night set-point");
   telnetClient.println("  override     setPoint      # set override set-point");
   telnetClient.println("  overrideLen  minutes       # set override duration (minutes)");
-  telnetClient.println("  dayStart     time          # set day start time (hour*100 + min)");
-  telnetClient.println("  dayEnd       time          # set day end time (hour*100 + min)");
+  telnetClient.println("  dayStart     time          # set day start time (hour*100 + min). Ex. 730");
+  telnetClient.println("  dayEnd       time          # set day end time (hour*100 + min). Ex. 1800");
+  telnetClient.println("  ssid         wifi ssid     # set wifi access point ssid");
+  telnetClient.println("  password     wifi password # set wifi access point password");
   telnetClient.println("  settings                   # print current settings");
   telnetClient.println("  save                       # save current settings");
   telnetClient.println("  cancel                     # cancel changes");
@@ -103,6 +112,8 @@ void ShowSettings()
   telnetClient.print("  overrideLen:  "); telnetClient.println(editSettings.overrideLen);
   telnetClient.print("  dayStart   :  "); telnetClient.println(editSettings.dayStart);
   telnetClient.print("  dayEnd     :  "); telnetClient.println(editSettings.dayEnd);
+  telnetClient.print("  ssid       :  "); telnetClient.println(editSettings.ssid);
+  telnetClient.print("  password   :  "); telnetClient.println("*********");
   telnetClient.println();
 }
 
@@ -189,8 +200,9 @@ void ParseCommand()
   }
 }
 
-void ExecuteCommand()
+bool ExecuteCommand()
 {
+  bool cmdExecuted = false;
   if (!cmdString.equals(String("")))
   {
     switch (FindCmdIndex())
@@ -209,6 +221,7 @@ void ExecuteCommand()
         break;
       case key:
         strncpy(editSettings.key, argString.c_str(), 256);
+        mqttDirty = true;
         break;
       case tempfeed:
         strncpy(editSettings.tempfeed, argString.c_str(), 256);
@@ -236,13 +249,32 @@ void ExecuteCommand()
       case dayEnd:
         editSettings.dayEnd = atoi(argString.c_str());
         break;      
-      case settings:
+       case ssid:
+        strncpy(editSettings.ssid, argString.c_str(), 256);
+        wifiDirty = true;
+        break;
+      case password:
+        strncpy(editSettings.password, argString.c_str(), 256);
+        wifiDirty = true;
+        break;
+     case settings:
         ShowSettings();
         break;
       case save:
         SaveSettings();
 
         UpdateSchedule();
+        
+        UpdateOverride();
+
+        if (wifiDirty)
+        {
+          telnetClient.println("Reconnecting WiFi. Please wait. May take a minute...");
+          telnetClient.println("Please close and re-open your telnet connection to continue changing settings");
+          delay(500);
+          WiFi.disconnect();  //we will automatically retry connection. May take a minute or so...
+          wifiDirty = false;
+        }
         
         if (mqttDirty)
         {
@@ -269,11 +301,103 @@ void ExecuteCommand()
         telnetClient.println("Unrecognized command");
         break;
     }
-  telnetClient.print("> ");
+    cmdExecuted = true;
   }
+  return cmdExecuted;
 }
 
 void SettingsInit() 
+{  
+  if (!EEPROMInit())
+  {
+    memcpy(&eepromSettings, &defaultSettings, sizeof(Settings_t));
+    SaveSettings();
+  }
+
+  memcpy(&editSettings, &eepromSettings, sizeof(Settings_t));  //get editable copy of current settings
+
+  rawString.reserve(256);
+  cmdString.reserve(256);
+  argString.reserve(256);
+
+}
+
+void ParseSerialCommand()
+{
+  char buffer[128] = "";
+  int index = 0;
+  char ch = 0;
+
+  if (Serial.available())
+  {
+    ch = Serial.read();
+    
+    while ((Serial.available()) && ((ch == '/r') || (ch == '/n')))
+    {
+      ch = Serial.read();
+    }
+    
+    if (ch != 0)
+    {
+      while ((Serial.available()) && ((ch != '/r') || (ch != '/n')))
+      {
+        buffer[index++] = ch;
+        ch = Serial.read();
+      }
+    }
+
+    buffer[index] = 0;
+    rawString = String(buffer);
+    rawString.trim();
+    argString = "";
+    cmdString = "";
+    if (rawString.length() != 0)
+    {
+      int separator = rawString.indexOf(' ');
+      if (0 != separator)
+      {
+        cmdString = rawString.substring(0, separator);
+        argString = rawString.substring(separator);
+        argString.trim();
+      }
+    }
+//    Serial.println(rawString);
+//    Serial.println(cmdString);
+//    Serial.println(argString);
+  }
+}
+
+//Can change settings via serial port at startup. 
+//  Useful in case telnet isn't working due to incorrect SSID or password.
+void SerialBackdoor()
+{
+  Serial.println("Enter any character within 5 seconds to halt startup and change settings");
+  int timer = 5;
+  while ((timer) && (!Serial.available()))
+  {
+    Serial.print(" --> "); Serial.println(timer--);
+    delay(1000);
+  }
+  
+  if (Serial.available())
+  {
+    while (Serial.available())
+      char c = Serial.read();
+      
+    Serial.println("  enter \"save\" to continue startup"); 
+    Serial.print("> ");
+    
+    do {
+      cmdString = "";
+      delay(100);
+      ParseSerialCommand();
+      if (ExecuteCommand())
+        Serial.print("> ");
+    } while (!cmdString.equals(String("save")));
+  }
+}
+
+void TelnetInit()
 {
   telnetServer.begin();
   telnetServer.setNoDelay(true);
@@ -282,17 +406,7 @@ void SettingsInit()
   Serial.print(WiFi.localIP());
   Serial.println(" 23' to connect");
 
-  rawString.reserve(256);
-  cmdString.reserve(256);
-  argString.reserve(256);
-
-  if (!EEPROMInit())
-  {
-    memcpy(&eepromSettings, &defaultSettings, sizeof(Settings_t));
-    SaveSettings();
-  }
 }
-
 
 void ProcessSettings() 
 {
@@ -310,7 +424,8 @@ void ProcessSettings()
   {
     cmdString = "";
     ParseCommand();
-    ExecuteCommand();
+    if (ExecuteCommand())
+      telnetClient.print("> ");
   }
 }
 
@@ -372,5 +487,15 @@ int GetDayStart()
 int GetDayEnd()
 {
   return eepromSettings.dayEnd;
+}
+
+char* GetSSID()
+{
+  return eepromSettings.ssid;
+}
+
+char* GetPassword()
+{
+  return eepromSettings.password;
 }
 

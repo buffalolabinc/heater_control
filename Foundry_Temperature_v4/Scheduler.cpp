@@ -65,6 +65,12 @@ void UpdateSchedule()
   LCDDisplayTemp(currentTemp, currentSetpoint);
 }
 
+void UpdateOverride()
+{
+  if (overrideEnabled)      
+      currentSetpoint = GetOverrideSetpoint();
+}
+
 void InitScheduler()
 {
   attachInterrupt(digitalPinToInterrupt(OVERRIDE_BUTTON), SetOverride, FALLING);
