@@ -4,10 +4,6 @@
 // Create an ESP8266 WiFiClient class.
 WiFiClient client;
 
-//#define WLAN_SSID       "BuffaloLab"
-//#define WLAN_PASS       "M4k3Stuff"
-
-
 bool WiFiInit(void) {
   int retries = 40;
   bool connected = false;
