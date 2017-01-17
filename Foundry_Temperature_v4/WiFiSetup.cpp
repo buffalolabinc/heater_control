@@ -6,8 +6,7 @@ WiFiClient client;
 
 //#define WLAN_SSID       "BuffaloLab"
 //#define WLAN_PASS       "M4k3Stuff"
-#define WLAN_SSID       "Express"
-#define WLAN_PASS       "fepulatorfepu"
+
 
 bool WiFiInit(void) {
   int retries = 40;
