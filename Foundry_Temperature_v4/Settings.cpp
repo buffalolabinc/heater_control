@@ -1,6 +1,8 @@
 
 #include "Common.h"
 
+char versionString[] = "1.00";
+
 WiFiServer telnetServer(23);
 WiFiClient telnetClient;
 
@@ -75,6 +77,8 @@ Settings_t defaultSettings = {
 
 void ShowMenu()
 {
+  telnetClient.print("Version:"); Serial.println(versionString); Serial.println();
+  
   telnetClient.println("Menu:");
   telnetClient.println("  server       mqttAddress   # set MQTT server");
   telnetClient.println("  port         mqttPort      # set MQTT port");

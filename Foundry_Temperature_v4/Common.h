@@ -15,6 +15,8 @@
 #include "Time.h"
 #include "TimeAlarms.h"
 
+extern char versionString[];
+
 #define DS_PIN  2 /* ds18b20 data pin */
 #define RELAY_PIN  15 /* solid state heat relay pin*/
 #define OVERRIDE_BUTTON 12 /*set point schedule override button */
