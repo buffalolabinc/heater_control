@@ -94,7 +94,7 @@ void SetOverride()
 {
   tmElements_t overrideExpiration;
 
-  if (millis() - overrideDebounce > 100)
+  if (millis() - overrideDebounce > 10)
   {
     overrideDebounce = millis();
     

@@ -5,6 +5,8 @@
 #include <ArduinoOTA.h>
 
 #include <OneWire.h>
+#include <DallasTemperature.h>
+
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
@@ -46,6 +48,10 @@ extern int cur_UTC_offset;
 //Temperature Sensor functions
 void InitTempSensors();
 float ReadTempSensors();
+void TempStartConversion();
+bool GetTempSensorAddress(uint8_t* buffer, int index);
+float GetSensorTemperature(int index);
+
 
 //MQTT functions
 void InitAdafruitMQTT();
@@ -84,6 +90,7 @@ void TelnetInit();
 void SettingsInit();
 void SerialBackdoor();
 void ProcessSettings();
+void ListTempSensors();
 char* GetMQTTServer();
 int GetMQTTPort();
 char* GetMQTTUser();

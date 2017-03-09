@@ -13,7 +13,7 @@ String rawString;
 bool mqttDirty = false;
 bool wifiDirty = false;
 
-typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, ssid, password, settings, save, cancel, menu, unknown};
+typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, settings, save, cancel, menu, unknown};
 
 char* commandStrings[] = {
                           "server",
@@ -28,6 +28,7 @@ char* commandStrings[] = {
                           "overrideLen",
                           "dayStart",
                           "dayEnd",
+                          "tempList",
                           "ssid",
                           "password",
                           "settings",
@@ -92,6 +93,7 @@ void ShowMenu()
   telnetClient.println("  overrideLen  minutes       # set override duration (minutes)");
   telnetClient.println("  dayStart     time          # set day start time (hour*100 + min). Ex. 730");
   telnetClient.println("  dayEnd       time          # set day end time (hour*100 + min). Ex. 1800");
+  telnetClient.println("  tempList                   # list temperature sensors");
   telnetClient.println("  ssid         wifi ssid     # set wifi access point ssid");
   telnetClient.println("  password     wifi password # set wifi access point password");
   telnetClient.println("  settings                   # print current settings");
@@ -252,6 +254,9 @@ bool ExecuteCommand()
         break;
       case dayEnd:
         editSettings.dayEnd = atoi(argString.c_str());
+        break;      
+      case tempList:
+        ListTempSensors();
         break;      
        case ssid:
         strncpy(editSettings.ssid, argString.c_str(), 256);
@@ -430,6 +435,28 @@ void ProcessSettings()
     ParseCommand();
     if (ExecuteCommand())
       telnetClient.print("> ");
+  }
+}
+
+void ListTempSensors()
+{
+  int index = 0;
+  uint8_t sensorAddr[8];
+  TempStartConversion();
+  while (GetTempSensorAddress(sensorAddr, index))
+  {
+    telnetClient.print(index);
+    telnetClient.print(":");
+
+    for (int i = 0; i < 8; i++) {
+      telnetClient.print(" ");
+      telnetClient.print(sensorAddr[i], HEX);
+    }
+    
+    telnetClient.print(": Temp = ");
+    telnetClient.print(GetSensorTemperature(index));
+    telnetClient.println("F");
+    index++;
   }
 }
 
