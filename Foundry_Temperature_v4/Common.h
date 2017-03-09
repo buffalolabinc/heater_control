@@ -4,8 +4,8 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include <OneWire.h>   //https://github.com/adafruit/MAX31850_OneWire
+#include <DallasTemperature.h>   //https://github.com/adafruit/MAX31850_DallasTemp
 
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
