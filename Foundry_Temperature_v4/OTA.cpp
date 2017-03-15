@@ -5,11 +5,12 @@ void InitOTA() {
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
 
-  // Hostname defaults to esp8266-[ChipID]
-  // ArduinoOTA.setHostname("myesp8266");
+  // Hostname defaults to esp8266-[ChipID].  Set it based on temp feed name
+  String  hostname = String("esp8266") + "-" + GetMQTTTempfeed();
+  ArduinoOTA.setHostname(hostname.c_str());
 
   // No authentication by default
-  // ArduinoOTA.setPassword((const char *)"123");
+  ArduinoOTA.setPassword((const char *)"M4k3Stuff");
 
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
@@ -29,8 +30,8 @@ void InitOTA() {
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
   ArduinoOTA.begin();
-  Serial.println("Ready");
-  Serial.print("IP address: ");
+  Serial.println("OTA Ready");
+  Serial.print("OTA IP address: ");
   Serial.println(WiFi.localIP());
 }
 
