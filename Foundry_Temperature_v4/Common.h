@@ -11,11 +11,11 @@
 #include "Adafruit_MQTT_Client.h"
 
 #include "Wire.h"
-#include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
+#include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
 
 
-#include "Time.h"
-#include "TimeAlarms.h"
+#include "Time.h"  //https://www.pjrc.com/teensy/td_libs_Time.html
+#include "TimeAlarms.h"  //https://www.pjrc.com/teensy/td_libs_TimeAlarms.html
 
 extern char versionString[];
 
