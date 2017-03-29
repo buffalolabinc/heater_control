@@ -1,7 +1,7 @@
 
 #include "Common.h"
 
-char versionString[] = "1.10";
+char versionString[] = "1.11";
 
 WiFiServer telnetServer(23);
 WiFiClient telnetClient;
@@ -177,7 +177,7 @@ void ParseCommand()
 
     if (ch != 0)
     {
-      while ((telnetClient.available()) && ((ch != '/r') || (ch != '/n')))
+      while ((telnetClient.available()) && (index < 127) && ((ch != '/r') || (ch != '/n')))
       {
 //        Serial.print(ch);
         buffer[index++] = ch;
@@ -348,7 +348,7 @@ void ParseSerialCommand()
     
     if (ch != 0)
     {
-      while ((Serial.available()) && ((ch != '/r') || (ch != '/n')))
+      while ((Serial.available()) && (index < 127) && ((ch != '/r') || (ch != '/n')))
       {
         buffer[index++] = ch;
         ch = Serial.read();

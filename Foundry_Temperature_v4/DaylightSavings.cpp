@@ -2,6 +2,8 @@
 //
 //  Daylight Savings Time
 //
+//  Written by Rick Lesniak.  
+//  BSD license, all text above must be included in any redistribution
 /////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
