@@ -13,7 +13,7 @@ String rawString;
 bool mqttDirty = false;
 bool wifiDirty = false;
 
-typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, settings, save, cancel, menu, unknown};
+typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, defaults, settings, save, cancel, menu, unknown};
 
 char* commandStrings[] = {
                           "server",
@@ -31,6 +31,7 @@ char* commandStrings[] = {
                           "tempList",
                           "ssid",
                           "password",
+                          "defaults",
                           "settings",
                           "save",
                           "cancel",
@@ -96,7 +97,8 @@ void ShowMenu()
   telnetClient.println("  tempList                   # list temperature sensors");
   telnetClient.println("  ssid         wifi ssid     # set wifi access point ssid");
   telnetClient.println("  password     wifi password # set wifi access point password");
-  telnetClient.println("  settings                   # print current settings");
+  telnetClient.println("  defaults                   # reset to default settings");
+  telnetClient.println("  settings                   # print current settings (cannot be undone)");
   telnetClient.println("  save                       # save current settings");
   telnetClient.println("  cancel                     # cancel changes");
   telnetClient.println("  ?                          # print this menu");
@@ -266,6 +268,13 @@ bool ExecuteCommand()
         strncpy(editSettings.password, argString.c_str(), 256);
         wifiDirty = true;
         break;
+     case defaults:
+//        memcpy(&eepromSettings, &defaultSettings, sizeof(Settings_t));
+        memcpy(&editSettings, &defaultSettings, sizeof(Settings_t));  //get editable copy of current settings
+        SaveSettings();
+        wifiDirty = true;
+        mqttDirty = true;
+        break;
      case settings:
         ShowSettings();
         break;
@@ -319,7 +328,7 @@ void SettingsInit()
 {  
   if (!EEPROMInit())
   {
-    memcpy(&eepromSettings, &defaultSettings, sizeof(Settings_t));
+    memcpy(&editSettings, &defaultSettings, sizeof(Settings_t));
     SaveSettings();
   }
 
