@@ -8,17 +8,13 @@ bool WiFiInit(void) {
   int retries = 40;
   bool connected = false;
 
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    WiFi.disconnect();
-    delay(1000);
-  }
-  
   Serial.print(F("Connecting to "));
 //  Serial.println(WLAN_SSID);
   Serial.println(GetSSID());
 
 //  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  WiFi.mode(WIFI_OFF);
+  WiFi.mode(WIFI_AP_STA);
   WiFi.begin(GetSSID(), GetPassword());
   while ((retries--) && (WiFi.status() != WL_CONNECTED)) {
     delay(500);
