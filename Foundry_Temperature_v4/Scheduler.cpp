@@ -90,12 +90,17 @@ void EndOverride()
 }
 
 uint32_t overrideDebounce = 0;
+uint32_t lastInterrupt = 0;
+uint32_t debounceCounter = 0;
 void SetOverride()
 {
   tmElements_t overrideExpiration;
+  debounceCounter++;
 
-  if (millis() - overrideDebounce > 10)
+  if (millis() - overrideDebounce > 250)
   {
+    Serial.print(" debounce count: "); Serial.println(debounceCounter);
+    debounceCounter = 0;
     overrideDebounce = millis();
     
     if (!overrideEnabled)
@@ -116,6 +121,10 @@ void SetOverride()
         currentSetpoint = GetDaySetpoint();
       else
         currentSetpoint = GetNightSetpoint();
+
+       Serial.print("   disabling override");
     }
   }
+
+  lastInterrupt = millis();
 }
