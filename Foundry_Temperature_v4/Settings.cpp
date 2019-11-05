@@ -300,7 +300,7 @@ bool ExecuteCommand()
           if (ReinitAdafruitMQTT())
           {
             telnetClient.println("successful");
-            FeedAdafruitMQTT(currentTemp, currentSetpoint);
+            FeedAdafruitMQTT(currentTemp, currentSetpoint, WiFi.RSSI());
           }
           else
              telnetClient.println("failed");           
@@ -538,4 +538,3 @@ char* GetPassword()
 {
   return eepromSettings.password;
 }
-

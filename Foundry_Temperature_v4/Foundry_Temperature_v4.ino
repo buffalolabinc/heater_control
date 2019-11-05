@@ -71,7 +71,7 @@ void syncDST()
 void UpdateAdafruitMQTT()
 {
   if (CheckAdafruitMQTT())
-    FeedAdafruitMQTT(currentTemp, currentSetpoint);
+    FeedAdafruitMQTT(currentTemp, currentSetpoint, WiFi.RSSI());
 }
 
 void CheckTemperature()
@@ -119,5 +119,3 @@ void CheckWiFi()
   }
   LCDDisplayIPAddress(WiFi.localIP().toString().c_str());
 }
-
-

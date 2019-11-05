@@ -1,6 +1,5 @@
 #include "Common.h"
 
-
 //#define AIO_SERVER      "io.adafruit.com"
 //#define AIO_SERVERPORT  1883
 //#define AIO_USERNAME    "adafruit_support_rick"
@@ -13,25 +12,33 @@ Adafruit_MQTT_Client* mqtt = NULL;
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
 Adafruit_MQTT_Publish* tempFeed = NULL;
 Adafruit_MQTT_Publish* setFeed = NULL;
+Adafruit_MQTT_Publish* rssiFeed = NULL;
 
 #define NUM_SENSORS (sizeof(sensorMap)/sizeof(SensorMap_t))
 
 String tempFeedStr; //need to use globals for these. Adafruit_MQTT_Client doesn't make a copy of the data - it just uses a pointer
 String setFeedStr;  // so we can't use a local variable in InitAdafruitMQTT()
+String rssiFeedStr;
 
 void InitAdafruitMQTT()
 {
   if (mqtt) delete mqtt;
   if (tempFeed) delete tempFeed;
   if (setFeed) delete setFeed;
+  if (rssiFeed) delete rssiFeed;
   
   mqtt = new Adafruit_MQTT_Client(&client, GetMQTTServer(), GetMQTTPort(), GetMQTTUser(), GetMQTTKey());
   tempFeedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTTempfeed();
   Serial.println(tempFeedStr);
   tempFeed = new Adafruit_MQTT_Publish(mqtt,  tempFeedStr.c_str());
+
   setFeedStr = String(GetMQTTUser()) + "/feeds/" + GetMQTTSetfeed();
   Serial.println(setFeedStr);
   setFeed = new Adafruit_MQTT_Publish(mqtt, setFeedStr.c_str());
+
+  rssiFeedStr = String(GetMQTTUser()) + "/feeds/rssi";
+  Serial.println(rssiFeedStr);
+  rssiFeed = new Adafruit_MQTT_Publish(mqtt, rssiFeedStr.c_str());
 }
 
 bool ReinitAdafruitMQTT()
@@ -92,7 +99,7 @@ bool CheckAdafruitMQTT()
   return isConnected;
 }
 
-void FeedAdafruitMQTT(float fahrenheit, int setpoint)
+void FeedAdafruitMQTT(float fahrenheit, int setpoint, int32_t rssi)
 {
   Serial.print(F("MQTT feed"));
 //  if (! sensorMap[0].feed->publish(fahrenheit))
@@ -101,5 +108,7 @@ void FeedAdafruitMQTT(float fahrenheit, int setpoint)
     Serial.print(F(" temperature feed failed."));
   if (! setFeed->publish(setpoint))
     Serial.print(F(" setpoint feed failed."));
+  if (! rssiFeed->publish(rssi))
+    Serial.print(F(" rssi feed failed."));
   Serial.println();
 }
