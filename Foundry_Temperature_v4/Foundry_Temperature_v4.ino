@@ -34,7 +34,7 @@ void setup(void) {
   LCDUpdateDisplay();
   
   Alarm.timerRepeat(5, CheckTemperature);     //check temperature every 5 seconds
-  Alarm.timerRepeat(270, UpdateAdafruitMQTT); //Update MQTT every 4.5 minutes (note - need this to be < 300 sec to keep MWTT alive).
+  Alarm.timerRepeat(30, UpdateAdafruitMQTT); //Update MQTT every 4.5 minutes (note - need this to be < 300 sec to keep MWTT alive).
   Alarm.timerRepeat(1, LCDUpdateDisplay);          //updates the LCD time display. Also bumps the NTP syncProvider timer
   Alarm.timerRepeat(15, CheckWiFi);          //checks that WiFi is still connected
 
