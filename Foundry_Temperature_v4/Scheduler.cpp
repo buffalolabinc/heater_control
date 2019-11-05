@@ -48,7 +48,7 @@ void UpdateSchedule()
       if (!overrideEnabled)
         currentSetpoint = GetDaySetpoint();
       currentState = daytime;
-      currentAlarm = Alarm.alarmOnce(GetDayStart() / 100, GetDayStart() % 100, 1, UpdateSchedule);  //Set an alarm to expire  at DAY_END
+      currentAlarm = Alarm.alarmOnce(GetDayEnd() / 100, GetDayEnd() % 100, 1, UpdateSchedule);  //Set an alarm to expire  at DAY_END
       Serial.print("Daytime Schedule. current setpoint is "); Serial.println(currentSetpoint);
       Serial.print("   current alarm is "); Serial.println(dtINVALID_ALARM_ID != currentAlarm?"valid":"invalid");
    }
