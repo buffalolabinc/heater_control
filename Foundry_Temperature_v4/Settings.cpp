@@ -1,6 +1,8 @@
 
 #include "Common.h"
 
+#define SETTINGS_HEADER 0x55555555
+
 char versionString[] = "1.11";
 
 WiFiServer telnetServer(23);
@@ -13,9 +15,9 @@ String rawString;
 bool mqttDirty = false;
 bool wifiDirty = false;
 
-typedef enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, defaults, settings, save, cancel, menu, unknown};
+enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, defaults, settings, save, cancel, menu, unknown };
 
-char* commandStrings[] = {
+const char* commandStrings[] = {
                           "server",
                           "port",
                           "user",
@@ -60,8 +62,8 @@ Settings_t eepromSettings;  //current eeprom settings (mirror of eeprom)
 Settings_t editSettings;    // editable copy of current settings
 
 Settings_t defaultSettings = {
-                                0xa5a5a5a5,         //header
-                                "io.adafruit.com",  //server
+                                SETTINGS_HEADER,    //header
+                                "",                 //server
                                 1883,               //port
                                 "",                 //user
                                 "",                 //key
@@ -73,8 +75,8 @@ Settings_t defaultSettings = {
                                 120,                //overrideLen
                                 730,                //dayStart
                                 1800,               //dayEnd  
-                                "BuffaloLab",       //ssid
-                                "M4k3Stuff"         //password                          
+                                "",                 //ssid
+                                ""                  //password
                               };
 
 void ShowMenu()
@@ -128,7 +130,7 @@ void ShowSettings()
 void SaveSettings()
 {
   memcpy(&eepromSettings, &editSettings, sizeof(Settings_t)); //commit editable copy to current settings
-  eepromSettings.header = 0xa5a5a5a5;
+  eepromSettings.header = SETTINGS_HEADER;
   EEPROM.put(0, eepromSettings);
   EEPROM.commit();
 }
@@ -143,7 +145,7 @@ bool EEPROMInit()
 {
   EEPROM.begin(sizeof(Settings_t));
   EEPROM.get(0, eepromSettings);
-  return (eepromSettings.header == 0xa5a5a5a5);
+  return (eepromSettings.header == SETTINGS_HEADER);
 }
 
 int FindCmdIndex()

@@ -1,6 +1,6 @@
 #include "Common.h"
 
-typedef enum states {off, daytime, nighttime, weekend };  //override turns heat up to daytime setpoint for 2 hours.
+enum states {off, daytime, nighttime, weekend };  //override turns heat up to daytime setpoint for 2 hours.
 
 int currentSetpoint;
 int currentState = off;

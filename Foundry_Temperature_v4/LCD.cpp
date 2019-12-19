@@ -19,7 +19,7 @@
 
 LiquidCrystal_I2C  lcd(I2C_ADDR, EN_PIN, RW_PIN, RS_PIN, D4_PIN, D5_PIN, D6_PIN, D7_PIN);
 
-char* days[] = {"", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+const char* days[] = {"", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 bool activityBlinker = true;
 
@@ -89,4 +89,3 @@ void LCDUpdateDisplay()
   LCDDisplayTemp(currentTemp, currentSetpoint);
   LCDDisplayOverrideStatus(overrideEnabled);
 }
-
