@@ -44,7 +44,6 @@ void setup(void) {
 //  attachInterrupt(digitalPinToInterrupt(DOWN_BUTTON), DecreaseSetPoint, FALLING);  //Only used with adjustable thermostat
 
   pinMode(OVERRIDE_BUTTON, INPUT_PULLUP); //see Scheduler.cpp for interrupt routine
-
 }
 
 void loop(void) 

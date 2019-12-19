@@ -3,7 +3,7 @@
 
 #define SETTINGS_HEADER 0x55555555
 
-char versionString[] = "1.11";
+char versionString[] = "1.12";
 
 WiFiServer telnetServer(23);
 WiFiClient telnetClient;
@@ -339,7 +339,6 @@ void SettingsInit()
   rawString.reserve(256);
   cmdString.reserve(256);
   argString.reserve(256);
-
 }
 
 void ParseSerialCommand()
