@@ -20,7 +20,7 @@ byte packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing pack
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP udp;
 
-unsigned long sendNTPpacket(IPAddress& address);
+void sendNTPpacket(IPAddress& address);
 
 void InitNTP()
 {
@@ -102,7 +102,7 @@ time_t getNTPTime()
 
 
 // send an NTP request to the time server at the given address
-unsigned long sendNTPpacket(IPAddress& address)
+void sendNTPpacket(IPAddress& address)
 {
   Serial.println("sending NTP packet...");
   // set all bytes in the buffer to 0
