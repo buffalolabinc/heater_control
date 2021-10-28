@@ -92,7 +92,7 @@ void EndOverride()
 uint32_t overrideDebounce = 0;
 uint32_t lastInterrupt = 0;
 uint32_t debounceCounter = 0;
-void SetOverride()
+void ICACHE_RAM_ATTR SetOverride()
 {
   tmElements_t overrideExpiration;
   debounceCounter++;
