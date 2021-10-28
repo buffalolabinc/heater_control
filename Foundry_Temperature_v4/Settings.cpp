@@ -1,8 +1,6 @@
 
 #include "Common.h"
 
-#define SETTINGS_HEADER 0x55555555
-
 char versionString[] = "1.12";
 
 WiFiServer telnetServer(23);
@@ -64,7 +62,7 @@ Settings_t eepromSettings;  //current eeprom settings (mirror of eeprom)
 Settings_t editSettings;    // editable copy of current settings
 
 Settings_t defaultSettings = {
-                                SETTINGS_HEADER,    //header
+                                0x05050505,         //header max of 0x7FFFFFFF
                                 "",                 //server
                                 1883,               //port
                                 "",                 //user
@@ -159,7 +157,7 @@ void ShowSettings()
 void SaveSettings()
 {
   memcpy(&eepromSettings, &editSettings, sizeof(Settings_t)); //commit editable copy to current settings
-  eepromSettings.header = SETTINGS_HEADER;
+  eepromSettings.header = defaultSettings.header;
   EEPROM.put(0, eepromSettings);
   EEPROM.commit();
 }
@@ -174,7 +172,7 @@ bool EEPROMInit()
 {
   EEPROM.begin(sizeof(Settings_t));
   EEPROM.get(0, eepromSettings);
-  return (eepromSettings.header == SETTINGS_HEADER);
+  return (eepromSettings.header == defaultSettings.header);
 }
 
 int FindCmdIndex()
