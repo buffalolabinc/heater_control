@@ -122,8 +122,8 @@ void ShowRunStatus()
   telnetClient.print ("  IP Address:   "); telnetClient.println(WiFi.localIP().toString());
   telnetClient.print ("  Override?:    "); telnetClient.println(overrideEnabled ? "on" : "off");
   telnetClient.print ("  Heating?:     "); telnetClient.println(heat_on ? "on" : "off");
-  telnetClient.printf("  Current Temp: %3i", currentTemp); telnetClient.println();
-  telnetClient.printf("  Set Temp:     %3i", currentSetpoint); telnetClient.println();
+  telnetClient.printf("  Current Temp: %3f", currentTemp); telnetClient.println();
+  telnetClient.printf("  Set Temp:     %2i", currentSetpoint); telnetClient.println();
   telnetClient.println();
 }
 
