@@ -44,6 +44,7 @@ bool WiFiInit(void);
 void InitNTP();
 time_t getNTPTime();
 extern int cur_UTC_offset;
+extern const char* days[];
 
 //Temperature Sensor functions
 void InitTempSensors();

@@ -15,7 +15,7 @@ String rawString;
 bool mqttDirty = false;
 bool wifiDirty = false;
 
-enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, defaults, settings, save, cancel, menu, unknown };
+enum Commands_t { server, port, user, key, tempfeed, setfeed, daySet, nightSet, overrideSet, overrideLen, dayStart, dayEnd, tempList, ssid, password, defaults, settings, save, cancel, toggleOverride, runStatus, menu, unknown};
 
 const char* commandStrings[] = {
                           "server",
@@ -37,6 +37,8 @@ const char* commandStrings[] = {
                           "settings",
                           "save",
                           "cancel",
+                          "toggleOverride",
+                          "status",
                           "?"
                          };
 
@@ -81,7 +83,7 @@ Settings_t defaultSettings = {
 
 void ShowMenu()
 {
-  telnetClient.print("Version:"); telnetClient.println(versionString); telnetClient.println();
+  telnetClient.print("Version: "); telnetClient.println(versionString); telnetClient.println();
   
   telnetClient.println("Menu:");
   telnetClient.println("  server       mqttAddress   # set MQTT server");
@@ -103,8 +105,35 @@ void ShowMenu()
   telnetClient.println("  settings                   # print current settings (cannot be undone)");
   telnetClient.println("  save                       # save current settings");
   telnetClient.println("  cancel                     # cancel changes");
+  telnetClient.println("  toggleOverride             # toggle the Override on/off");
+  telnetClient.println("  status                     # Run Status");
   telnetClient.println("  ?                          # print this menu");
   telnetClient.println();
+}
+
+void ShowRunStatus()
+{
+  time_t localTime = now();
+  tmElements_t tm;
+  breakTime(localTime, tm);
+
+  telnetClient.println("Run Status:");
+  telnetClient.print ("  Version:      "); telnetClient.println(versionString);
+  telnetClient.print ("  ESP Version:  "); telnetClient.println(ESP.getFullVersion());
+  telnetClient.printf("  Date/Time:    %02i:%02i %3s %02i/%02i/%4i", tm.Hour, tm.Minute, days[tm.Wday], tm.Month, tm.Day, tm.Year + 1970); telnetClient.println();
+  telnetClient.print ("  IP Address:   "); telnetClient.println(WiFi.localIP().toString());
+  telnetClient.print ("  Override?:    "); telnetClient.println(overrideEnabled ? "on" : "off");
+  telnetClient.print ("  Heating?:     "); telnetClient.println(heat_on ? "on" : "off");
+  telnetClient.printf("  Current Temp: %3i", currentTemp); telnetClient.println();
+  telnetClient.printf("  Set Temp:     %3i", currentSetpoint); telnetClient.println();
+  telnetClient.println();
+}
+
+void ToggleOverride()
+{
+  SetOverride();
+  telnetClient.print ("  Override?:    "); telnetClient.println(overrideEnabled ? "on" : "off");
+  telnetClient.print ("  Heating?:     "); telnetClient.println(heat_on ? "on" : "off");
 }
 
 void ShowSettings()
@@ -315,6 +344,12 @@ bool ExecuteCommand()
         break;
       case menu:
         ShowMenu();
+        break;
+      case runStatus:
+        ShowRunStatus();
+        break;
+      case toggleOverride:
+        ToggleOverride();
         break;
       case unknown:
       default:
