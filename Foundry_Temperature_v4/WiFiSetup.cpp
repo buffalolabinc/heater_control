@@ -14,7 +14,7 @@ bool WiFiInit(void) {
 
 //  WiFi.begin(WLAN_SSID, WLAN_PASS);
   WiFi.mode(WIFI_OFF);
-  WiFi.mode(WIFI_AP_STA);
+  WiFi.mode(WIFI_STA);
   WiFi.begin(GetSSID(), GetPassword());
   while ((retries--) && (WiFi.status() != WL_CONNECTED)) {
     delay(500);
@@ -35,4 +35,3 @@ bool WiFiInit(void) {
   LCDDisplayIPAddress(WiFi.localIP().toString().c_str());
   return connected;
 }
-
