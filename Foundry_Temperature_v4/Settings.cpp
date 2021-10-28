@@ -1,7 +1,7 @@
 
 #include "Common.h"
 
-char versionString[] = "1.12";
+char versionString[] = "1.13-v20211028";
 
 WiFiServer telnetServer(23);
 WiFiClient telnetClient;
