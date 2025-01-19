@@ -201,14 +201,14 @@ void ParseCommand()
   if (telnetClient.available())
   {
     ch = telnetClient.read();
-    while ((telnetClient.available()) && ((ch == '/r') || (ch == '/n')))
+    while ((telnetClient.available()) && ((ch == '\r') || (ch == '\n')))
     {
       ch = telnetClient.read();
     }
 
     if (ch != 0)
     {
-      while ((telnetClient.available()) && (index < 127) && ((ch != '/r') || (ch != '/n')))
+      while ((telnetClient.available()) && (index < 127) && ((ch != '\r') || (ch != '\n')))
       {
 //        Serial.print(ch);
         buffer[index++] = ch;
@@ -384,14 +384,14 @@ void ParseSerialCommand()
   {
     ch = Serial.read();
     
-    while ((Serial.available()) && ((ch == '/r') || (ch == '/n')))
+    while ((Serial.available()) && ((ch == '\r') || (ch == '\n')))
     {
       ch = Serial.read();
     }
     
     if (ch != 0)
     {
-      while ((Serial.available()) && (index < 127) && ((ch != '/r') || (ch != '/n')))
+      while ((Serial.available()) && (index < 127) && ((ch != '\r') || (ch != '\n')))
       {
         buffer[index++] = ch;
         ch = Serial.read();
