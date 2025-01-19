@@ -13,6 +13,8 @@ bool WiFiInit(void) {
   Serial.println(GetSSID());
 
 //  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  WiFi.hostname(GetHostname());
+
   WiFi.mode(WIFI_OFF);
   WiFi.mode(WIFI_STA);
   WiFi.begin(GetSSID(), GetPassword());

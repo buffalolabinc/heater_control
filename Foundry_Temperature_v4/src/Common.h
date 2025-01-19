@@ -92,6 +92,7 @@ void SettingsInit();
 void SerialBackdoor();
 void ProcessSettings();
 void ListTempSensors();
+String GetHostname();
 char* GetMQTTServer();
 int GetMQTTPort();
 char* GetMQTTUser();

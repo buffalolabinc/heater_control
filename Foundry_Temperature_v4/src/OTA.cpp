@@ -5,9 +5,7 @@ void InitOTA() {
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
 
-  // Hostname defaults to esp8266-[ChipID].  Set it based on temp feed name
-  String  hostname = String("esp8266") + "-" + GetMQTTTempfeed();
-  ArduinoOTA.setHostname(hostname.c_str());
+  ArduinoOTA.setHostname(GetHostname().c_str());
 
   // No authentication by default
   ArduinoOTA.setPassword((const char *)"M4k3Stuff");

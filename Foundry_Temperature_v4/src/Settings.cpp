@@ -503,6 +503,15 @@ void ListTempSensors()
   }
 }
 
+String GetHostname()
+{
+  if (strcmp(GetMQTTTempfeed(), "") != 0) {
+    return String("esp8266") + "-" + GetMQTTTempfeed();
+  }
+
+  return String("esp8266") + "-" + String(ESP.getChipId(), HEX);
+}
+
 char* GetMQTTServer()
 {
   return eepromSettings.server;
