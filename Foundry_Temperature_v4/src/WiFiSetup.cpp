@@ -9,10 +9,8 @@ bool WiFiInit(void) {
   bool connected = false;
 
   Serial.print(F("Connecting to "));
-//  Serial.println(WLAN_SSID);
   Serial.println(GetSSID());
 
-//  WiFi.begin(WLAN_SSID, WLAN_PASS);
   WiFi.hostname(GetHostname());
 
   WiFi.mode(WIFI_OFF);
