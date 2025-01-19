@@ -16,6 +16,11 @@ bool WiFiInit(void) {
   WiFi.hostname(GetHostname());
 
   WiFi.mode(WIFI_OFF);
+  // do not connect on boot
+  WiFi.setAutoConnect(false);
+  WiFi.persistent(false);
+  // but do reconnect if disconnected
+  WiFi.setAutoReconnect(true);
   WiFi.mode(WIFI_STA);
   WiFi.begin(GetSSID(), GetPassword());
   while ((retries--) && (WiFi.status() != WL_CONNECTED)) {
